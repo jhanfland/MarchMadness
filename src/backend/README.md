@@ -84,3 +84,17 @@ body:
     "email" : "example@gmail.com",
     "password" : "password"
 } 
+
+#   Edge Cases to be Handled/Features to be Added to for Registration/Log-in
+#       Sign-up/Register
+#           -   Minimum password Length (8 characters should be a good enough length)
+#           -   Hashing password (Use hashlib module for hashing)
+#           -   Create IDs for all users (In the future this will also have to be implemented for 
+#               bets and games)
+#       Log-in
+#           - Update password comparisions to check hashed password
+#
+#
+#   Ideas for Testing Updated Implementation of Registration/Log-in
+#       -   Login with deleted account
+#       -   Login with changed password
