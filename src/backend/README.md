@@ -89,8 +89,6 @@ body:
 #       Sign-up/Register
 #           -   Minimum password Length (8 characters should be a good enough length)
 #           -   Hashing password (Use hashlib module for hashing)
-#           -   Create IDs for all users (In the future this will also have to be implemented for 
-#               bets and games)
 #       Log-in
 #           - Update password comparisions to check hashed password
 #
