@@ -58,6 +58,12 @@ describe('Flask API Tests', () => {
       expect(response.status).toBe(200);
       expect(response.data.message).toBe('Password reset link sent');
     });
+
+    it('should send a password reset link', async () => {
+      const response = await axios.post(`${backendUrl}/auth/reset-password`, { email: testUser.email });
+      expect(response.status).toBe(200);
+      expect(response.data.message).toBe('Password reset successful');
+    });
   });
 
   describe('Email Verification', () => {
@@ -85,5 +91,14 @@ describe('Flask API Tests', () => {
         expect(error.response.data.message).toBe('Not Found');
       }
     });
+
+    it('should return 500 for internal server error', async () => {
+      try {
+        await axios.get(`${backendUrl}/some-500-error-route`);
+      } catch (error: any) {
+        expect(error.response.status).toBe(500);
+      }
+    });
+
   });
 });
