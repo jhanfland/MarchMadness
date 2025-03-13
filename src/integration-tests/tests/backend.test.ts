@@ -29,6 +29,17 @@ describe('Flask API Tests', () => {
         expect(error.response.data.error).toBe('Invalid email or password.');
       }
     });
+
+    it('should not register a user with a registered email', async () => {
+      try{
+        await axios.post(`${backendUrl}/auth/register`, { email: "test@test.com", password: "password" });
+        await axios.post(`${backendUrl}/auth/register`, { email: "test@test.com", password: "password" });
+      } catch (error: any) {
+        expect(error.response.status).toBe(400);
+        expect(error.response.data.error).toBe('Email already exists');
+      }
+    });
+
   });
 
   describe('Logout and Profile Management', () => {
