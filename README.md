@@ -48,7 +48,16 @@ Our plan for next week is to set up the sign in page, start user authentication 
 ## Sprint 1, Week 2 (Febuary 26 - March 4) - Progress Report
 This week we completed the sign in page, and also the user authentication and now all three, frontend, backend, database are functional and talking to each other.
 
-Our plan for next week is to start implimenting the API calls and information into the database and complete the homepage and bar to choose which page you are on for the frontend 
+Our plan for next week is to start implimenting the API calls and information into the database and complete the homepage and bar to choose which page you are on for the frontend. 
 
 ## Sprint 2, Week 1 (March 4 - March 11) - Progress Report
-To be continued ... 
+This week we completed the implementation for the API calls for user authentication and ensured that these calls are
+capable of storing informaiton in our database. We also completed the homepage interface so that is able to navigate to the
+login and signup page.
+
+Our plan for next week is to implement bracket functionality as well as creating a bracket interface. Additionally, we want to 
+work on umproving UI/UX for out signup/login pages. Other implementations include adding including a CD/CI Pipeline for 
+our project.
+
+## Sprint 2, Week 2 (March 11 - March 18) - Progress Report
+To be updated...
