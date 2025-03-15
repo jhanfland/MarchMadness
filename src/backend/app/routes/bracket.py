@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, session
-from app import db, api_key, mm_tournament_id
+from app import db, api_key, mm_tournament_id, prev_mm_tournament_id
 from app.models.bracket import Bracket
 from app.models.user import User
 import datetime
@@ -11,7 +11,8 @@ bracket_bp = Blueprint('bracket', __name__)
 # Returns live bracket from API
 @bracket_bp.route('/get_bracket', methods=['GET'])
 def get_realtime_bracket():
-    url = f"https://api.sportradar.com/ncaamb/trial/v8/en/tournaments/{mm_tournament_id}/schedule.json?api_key={api_key}"
+    # switch out mm_tournament_id, with prev_mm_tournament_id dependent on what you need to understand/use
+    url = f"https://api.sportradar.com/ncaamb/trial/v8/en/tournaments/{prev_mm_tournament_id}/schedule.json?api_key={api_key}"
     headers = {"accept": "application/json"}
     response = requests.get(url, headers=headers)
     return jsonify(response.json())

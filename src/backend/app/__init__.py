@@ -9,6 +9,7 @@ import os
 # Get environment variables globally
 api_key = os.getenv('BRACKET_API_KEY')
 mm_tournament_id = os.getenv('MM_TOURNAMENT_ID')
+prev_mm_tournament_id = os.getenv('MM_PREV_TOURNAMENT_ID')
 
 db = SQLAlchemy()
 
