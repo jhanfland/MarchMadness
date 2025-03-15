@@ -39,6 +39,7 @@ export function SignupForm () {
       }
 
       alert("Signup successful!");
+      localStorage.setItem("token", data.token);
       navigate("/");
     } catch (error: any) {
       console.error("Signup failed:", error);

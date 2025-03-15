@@ -15,8 +15,10 @@ def create_app():
     # Register Blueprints (Controllers) 
     from app.routes.auth import auth_bp
     from app.routes.main import main_bp
+    from app.routes.bracket import bracket_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
+    app.register_blueprint(bracket_bp)
     
      # Register error handlers
     from app.error_handlers import register_error_handlers
