@@ -1,25 +1,23 @@
 from flask import Blueprint, request, jsonify, session
-from app import db
+from app import db, api_key, mm_tournament_id
 from app.models.bracket import Bracket
 from app.models.user import User
 import datetime
+import requests
 from flask import current_app as app
 
-auth_bp = Blueprint('bracket', __name__)
-
-api_key = 'jDrDUvhEht7LF0QsD6fV22sGyLbijW9HrzvHO4C4' # Bad code practice, make sure I hide it later
-mm_tournament_id = 'REMOVED_SECRET'
+bracket_bp = Blueprint('bracket', __name__)
 
 # Returns live bracket from API
-@auth_bp.route('/get_bracket', methods=['GET'])
+@bracket_bp.route('/get_bracket', methods=['GET'])
 def get_realtime_bracket():
-    url = url = f"https://api.sportradar.com/ncaamb/trial/v8/en/tournaments/{mm_tournament_id}/schedule.json?api_key={api_key}"
+    url = f"https://api.sportradar.com/ncaamb/trial/v8/en/tournaments/{mm_tournament_id}/schedule.json?api_key={api_key}"
     headers = {"accept": "application/json"}
-    response = request.get(url, headers=headers)
-    return response
+    response = requests.get(url, headers=headers)
+    return jsonify(response.json())
 
 # Returns users bracket that has already been created
-@auth_bp.route('/get_user_bracket/<int:bracket_number>', methods=['GET'])
+@bracket_bp.route('/get_user_bracket/<int:bracket_number>', methods=['GET'])
 def get_user_bracket(bracket_number):
     # User Verification
     user, mes, errNum = verify_user()
@@ -38,7 +36,7 @@ def get_user_bracket(bracket_number):
     }), 200
 
 # Created User Bracket
-@auth_bp.route('/create_user_bracket', methods=['POST'])
+@bracket_bp.route('/create_user_bracket', methods=['POST'])
 def create_user_bracket():
     # User Verification
     user, mes, errNum = verify_user()

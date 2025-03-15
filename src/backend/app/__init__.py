@@ -2,6 +2,13 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from config import Config
+from dotenv import load_dotenv
+from pathlib import Path
+import os
+
+# Get environment variables globally
+api_key = os.getenv('BRACKET_API_KEY')
+mm_tournament_id = os.getenv('MM_TOURNAMENT_ID')
 
 db = SQLAlchemy()
 
@@ -23,5 +30,4 @@ def create_app():
      # Register error handlers
     from app.error_handlers import register_error_handlers
     register_error_handlers(app)
-
     return app
