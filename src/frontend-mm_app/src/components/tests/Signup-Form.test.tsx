@@ -1,12 +1,17 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { SignupForm } from "../../Pages/Signup-Form";
 import { describe, it, expect } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 
 // Test for Sign up form
 describe("SignupForm Component", () => {
   // Test surrounding form element
   it("renders Signup form and ensures functionality", () => {
-    render(<SignupForm />);
+    render(
+      <MemoryRouter>
+        <SignupForm />
+      </MemoryRouter>
+    );
 
     // Ensures popover links are present
     fireEvent.click(screen.getByText(/terms of service/i));
