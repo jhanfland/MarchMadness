@@ -2,9 +2,11 @@
 ############### Setup ###############
 #####################################
 stages:
+  - lint
+  - static_analysis
+  - unit_test
   - build
-#  - unit_test
-#  - release
+  - release
 
 variables:
   RELEASE_TAG: release-$CI_PIPELINE_IID
@@ -22,51 +24,128 @@ services:
   - name: docker:20.10.16-dind
     alias: docker
 
+#####################################
+############## Linting ##############
+#####################################
+lint_backend:
+  stage: lint
+  image: python
+  before_script:
+    - pip install -r src/backend/requirements.txt
+  script:
+    - black ./src/backend --check --verbose --diff --color
+    - flake8 ./src/backend --max-line-length=88
+  tags:
+    - dind
+
+lint_frontend:
+  stage: lint
+  image: node:18
+  before_script:
+    - cd src/frontend-mm_app
+    - npm install
+  script:
+    - npm run lint
+  tags:
+    - dind
+
+#####################################
+########## Static Analysis ##########
+#####################################
+static_analysis_backend:
+  stage: static_analysis
+  image: python:3.9
+  before_script:
+    - pip install -r src/backend/requirements.txt
+  script:
+    - mypy src/backend
+  tags:
+    - dind
+
+#####################################
+############## Testing ##############
+#####################################
+unit_test_backend:
+  stage: unit_test
+  image: python:3.9
+  services:
+    - name: mysql:latest
+      alias: db
+      command: [ "--default-authentication-plugin=mysql_native_password" ]
+  before_script:
+    - pip install -r src/backend/requirements.txt
+    - sleep 10  # Give MySQL time to initialize
+    - python -m flask db upgrade  # Apply migrations
+  script:
+    - pytest src/backend/tests/ --cov=src/backend/
+  after_script:
+    - coverage report
+    - coverage xml > src/backend/coverage.xml
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: src/backend/coverage.xml
+  tags:
+    - dind
+
+unit_test_frontend:
+  stage: unit_test
+  image: node:18
+  before_script:
+    - cd src/frontend-mm_app
+    - npm install
+  script:
+    - npm test -- --coverage
+  tags:
+    - dind
 
 #####################################
 ############## Build ################
 #####################################
-
-#build_backend:
-#  stage: build
-#  image: docker:20.10.16
-#  services:
-#    - docker:20.10.16-dind
-#  script:
-#    - docker build -t backend:latest ./src/backend
-#  artifacts:
-#    paths:
-#      - src/backend
-#  tags:
-#    - dind
-build-docker-compose:
+build_backend:
   stage: build
-  image: docker:node:18-alpine
+  image: docker:20.10.16
   services:
-    - docker:dind
+    - docker:20.10.16-dind
   script:
-    - docker-compose up --build
+    - docker build -t backend:latest ./src/backend
+  artifacts:
+    paths:
+      - src/backend
+  tags:
+    - dind
 
-#####################################
-############## Test #################
-#####################################
+build_frontend:
+  stage: build
+  image: node:18
+  before_script:
+    - cd src/frontend-mm_app
+    - npm install
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - src/frontend-mm_app/dist
+  tags:
+    - dind
 
 #####################################
 ########## Build & Release ##########
 #####################################
-#release:
-#  stage: release
-#  image: docker:20.10.16
-#  services:
-#    - docker:20.10.16-dind
-#  script:
-#    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-#    - docker-compose -f docker-compose.yml build
-#    - docker tag backend:latest $CI_REGISTRY_IMAGE/backend:$RELEASE_TAG
-#    - docker tag frontendReact:latest $CI_REGISTRY_IMAGE/frontend:$RELEASE_TAG
-#    - docker push $CI_REGISTRY_IMAGE/backend:$RELEASE_TAG
-#    - docker push $CI_REGISTRY_IMAGE/frontend:$RELEASE_TAG
-#  tags:
-#    - dind
-#  only:
-#    - main
+release:
+  stage: release
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker-compose -f docker-compose.yml build
+    - docker tag backend:latest $CI_REGISTRY_IMAGE/backend:$RELEASE_TAG
+    - docker tag frontendReact:latest $CI_REGISTRY_IMAGE/frontend:$RELEASE_TAG
+    - docker push $CI_REGISTRY_IMAGE/backend:$RELEASE_TAG
+    - docker push $CI_REGISTRY_IMAGE/frontend:$RELEASE_TAG
+  tags:
+    - dind
+  only:
+    - main
