@@ -35,8 +35,11 @@ lint_backend:
     - pip install black 
     - pip install flake8
   script:
-    - black ./src/backend --check --verbose --diff --color || true
-    - flake8 ./src/backend --max-line-length=88 || true
+    - set +e
+    - if ! black ./src/backend --check --verbose --diff --color; then
+        echo "Backend Linting Failed!"
+    - if ! flake8 ./src/backend --max-line-length=88; then
+        echo "Backend Linting Failed!"
   tags:
     - dind
   allow_failure: true
@@ -47,9 +50,10 @@ lint_frontend:
   before_script:
     - cd src/frontend-mm_app
     - npm install
-
   script:
-    - npm run lint || true
+    - set +e
+    - if ! npm run lint; then
+        echo "Fronted Linting Failed!"
   tags:
     - dind
   allow_failure: true
@@ -64,7 +68,7 @@ static_analysis_backend:
     - pip install -r src/backend/requirements.txt
     - pip install mypy
   script:
-    - mypy src/backend --verbose
+    - mypy src/backend
   tags:
     - dind
   allow_failure: true
