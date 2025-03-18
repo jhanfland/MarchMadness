@@ -1,55 +1,6 @@
 import { useState } from "react";
 import { Bracket as BracketType, Region } from "@/Pages/Bracket/components/bracketTypes";
-import { Bracket as ReactBracket, RoundProps } from 'react-brackets';
-
-const rounds: RoundProps[] = [
-  {
-    title: 'Round one',
-    seeds: [
-      {
-        id: 1,
-        date: new Date().toDateString(),
-        teams: [{ name: 'Team A' }, { name: 'Team B' }],
-      },
-      {
-        id: 2,
-        date: new Date().toDateString(),
-        teams: [{ name: 'Team C' }, { name: 'Team D' }],
-      },
-    ],
-  },
-  {
-    title: 'Round two',
-    seeds: [
-      {
-        id: 3,
-        date: new Date().toDateString(),
-        teams: [{ name: 'Team A' }, { name: 'Team C' }],
-      },
-    ],
-  },
-  {
-    title: 'Round Three',
-    seeds: [
-      {
-        id: 3,
-        date: new Date().toDateString(),
-        teams: [{ name: 'Team A' }, { name: 'Team C' }],
-      },
-    ],
-  },
-  {
-    title: 'Round Four',
-    seeds: [
-      {
-        id: 3,
-        date: new Date().toDateString(),
-        teams: [{ name: 'Team D' }, { name: 'Team Z' }],
-      },
-    ],
-  },
-];
-
+import { Bracket as SingleEliminationBracket } from "@g-loot/react-tournament-brackets";
 
 export default function Bracket({ bracket }: BracketType) {
     const [selectedRegion, setSelectedRegion] = useState<Region>("EAST");
@@ -57,7 +8,7 @@ export default function Bracket({ bracket }: BracketType) {
     return (
         <div> 
             <p> {bracket.title} </p>
-            <ReactBracket rounds={rounds} />
+            <SingleEliminationBracket rounds={rounds} />
             <div className="flex gap-5"> 
                 {(["EAST", "WEST", "SOUTH", "MIDWEST"] as Region[]).map((region) => (
                     <button 
