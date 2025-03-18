@@ -21,7 +21,7 @@ variables:
 ############## Services #############
 #####################################
 services:
-  - name: docker:20.10.16-dind
+  - name: docker:did
     alias: docker
 
 #####################################
@@ -36,10 +36,8 @@ lint_backend:
     - pip install flake8
   script:
     - set +e
-    - if ! black ./src/backend --check --verbose --diff --color; then
-        echo "Backend Linting Failed!"
-    - if ! flake8 ./src/backend --max-line-length=88; then
-        echo "Backend Linting Failed!"
+    - black ./src/backend --check --verbose --diff --color
+    - flake8 ./src/backend --max-line-length=88
   tags:
     - dind
   allow_failure: true
@@ -52,8 +50,7 @@ lint_frontend:
     - npm install
   script:
     - set +e
-    - if ! npm run lint; then
-        echo "Fronted Linting Failed!"
+    - npm run lint
   tags:
     - dind
   allow_failure: true
@@ -88,15 +85,7 @@ test_backend:
     - sleep 10  # Give MySQL time to initialize
     - python -m flask db upgrade  # Apply migrations
   script:
-    - pytest src/backend/tests/ --cov=src/backend/
-  after_script:
-    - coverage report
-    - coverage xml > src/backend/coverage.xml
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: src/backend/coverage.xml
+    - npm run --prefix .\src\integration-tests\tests
   tags:
     - dind
   allow_failure: true
