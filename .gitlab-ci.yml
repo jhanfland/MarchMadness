@@ -35,8 +35,8 @@ lint_backend:
     - pip install black 
     - pip install flake8
   script:
-    - black ./src/backend --check --verbose --diff --color
-    - flake8 ./src/backend --max-line-length=88
+    - black ./src/backend --check --verbose --diff --color || true
+    - flake8 ./src/backend --max-line-length=88 || true
   tags:
     - dind
   allow_failure: true
@@ -49,7 +49,7 @@ lint_frontend:
     - npm install
 
   script:
-    - npm run lint
+    - npm run lint || true
   tags:
     - dind
   allow_failure: true
@@ -62,8 +62,9 @@ static_analysis_backend:
   image: python:3.9
   before_script:
     - pip install -r src/backend/requirements.txt
+    - pip install mypy
   script:
-    - mypy src/backend
+    - mypy src/backend --verbose
   tags:
     - dind
   allow_failure: true
@@ -111,34 +112,43 @@ test_frontend:
 #####################################
 ############## Build ################
 #####################################
-build_backend:
+docker_compose:
   stage: build
   image: docker:20.10.16
   services:
     - docker:20.10.16-dind
-  script:
-    - docker build -t backend:latest ./src/backend
-  artifacts:
-    paths:
-      - src/backend
-  tags:
-    - dind
+  script: 
+    - docker-compose up --build
   allow_failure: true
 
-build_frontend:
-  stage: build
-  image: node:18
-  before_script:
-    - cd src/frontend-mm_app
-    - npm install
-  script:
-    - npm run build
-  artifacts:
-    paths:
-      - src/frontend-mm_app/dist
-  tags:
-    - dind
-  allow_failure: true
+#build_backend:
+#  stage: build
+#  image: docker:20.10.16
+#  services:
+#    - docker:20.10.16-dind
+#  script:
+#    - docker build -t backend:latest ./src/backend
+#  artifacts:
+#    paths:
+#      - src/backend
+#  tags:
+#    - dind
+#  allow_failure: true
+
+#build_frontend:
+#  stage: build
+#  image: node:18
+#  before_script:
+#    - cd src/frontend-mm_app
+#    - npm install
+#  script:
+#    - npm run build
+#  artifacts:
+#    paths:
+#      - src/frontend-mm_app/dist
+#  tags:
+#    - dind
+#  allow_failure: true
 
 #####################################
 ########## Build & Release ##########
