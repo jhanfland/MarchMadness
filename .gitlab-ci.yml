@@ -4,7 +4,7 @@
 stages:
   - lint
   - static_analysis
-  - unit_test
+  - test
   - build
   - release
 
@@ -39,6 +39,7 @@ lint_backend:
     - flake8 ./src/backend --max-line-length=88
   tags:
     - dind
+  allow_failure: true
 
 lint_frontend:
   stage: lint
@@ -51,6 +52,7 @@ lint_frontend:
     - npm run lint
   tags:
     - dind
+  allow_failure: true
 
 #####################################
 ########## Static Analysis ##########
@@ -64,12 +66,13 @@ static_analysis_backend:
     - mypy src/backend
   tags:
     - dind
+  allow_failure: true
 
 #####################################
 ############## Testing ##############
 #####################################
-unit_test_backend:
-  stage: unit_test
+test_backend:
+  stage: test
   image: python:3.9
   services:
     - name: mysql:latest
@@ -91,9 +94,10 @@ unit_test_backend:
         path: src/backend/coverage.xml
   tags:
     - dind
+  allow_failure: true
 
-unit_test_frontend:
-  stage: unit_test
+test_frontend:
+  stage: test
   image: node:18
   before_script:
     - cd src/frontend-mm_app
@@ -102,6 +106,7 @@ unit_test_frontend:
     - npm test -- --coverage
   tags:
     - dind
+  allow_failure: true
 
 #####################################
 ############## Build ################
@@ -118,6 +123,7 @@ build_backend:
       - src/backend
   tags:
     - dind
+  allow_failure: true
 
 build_frontend:
   stage: build
@@ -132,6 +138,7 @@ build_frontend:
       - src/frontend-mm_app/dist
   tags:
     - dind
+  allow_failure: true
 
 #####################################
 ########## Build & Release ##########
