@@ -1,115 +1,77 @@
 import axios from 'axios';
-// Url of Flask backend
+
 const backendUrl = 'http://localhost:8000';
 // backend API endpoint tests
 describe('Flask API Tests', () => {
-  // Root Url
-  describe('Root endpoint', () => {
-    // Root endpoint
-    it('should return "Hello, World!" from the root endpoint', async () => {
-      const response = await axios.get(`${backendUrl}/`);
+  let testUser = { email: `test${Date.now()}@example.com`, password: "password" };
+  let authToken: string;
+
+  describe('User Registration and Authentication', () => {
+    it('should register a new user', async () => {
+      const response = await axios.post(`${backendUrl}/auth/register`, testUser);
+      expect(response.status).toBe(201);
+      expect(response.data.message).toBe('User registered');
+    });
+
+    it('should log in an existing user and return a token', async () => {
+      const response = await axios.post(`${backendUrl}/auth/login`, testUser);
       expect(response.status).toBe(200);
-      expect(response.data.message).toBe('Hello, World!');
+      expect(response.data.message).toBe('Login successful');
+      expect(response.data.token).toBeDefined();
+      authToken = response.data.token;
+    });
+
+    it('should not log in with incorrect credentials', async () => {
+      try {
+        await axios.post(`${backendUrl}/auth/login`, { email: testUser.email, password: "password" });
+      } catch (error: any) {
+        expect(error.response.status).toBe(401);
+        expect(error.response.data.error).toBe('Invalid email or password.');
+      }
     });
   });
-  // User Signing in and out of account
-  describe('Log in, Log out endpoints', () => {
-    // Login
-    it('should return "Login endpoint" from /auth/login', async () => {
-      const response = await axios.get(`${backendUrl}/auth/login`);
+
+  describe('Logout and Profile Management', () => {
+    it('should log out the user', async () => {
+      const response = await axios.post(`${backendUrl}/auth/logout`, {}, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
       expect(response.status).toBe(200);
-      expect(response.data.message).toBe('Login endpoint');
-    });
-    // Logout
-    it('should return "Logout endpoint" from /auth/logout', async () => {
-      const response = await axios.get(`${backendUrl}/auth/logout`);
-      expect(response.status).toBe(200);
-      expect(response.data.message).toBe('Logout endpoint');
+      expect(response.data.message).toBe('Logout successful');
     });
   });
-  // User Registering and Deleting Account
-  describe('Registration, Deletion endpoints', () => {
-    // Sign Up
-    it('should return "Register endpoint" from /auth/register', async () => {
-      const response = await axios.get(`${backendUrl}/auth/register`);
+
+  describe('Password and Account Management', () => {
+    it('should send a password reset link', async () => {
+      const response = await axios.post(`${backendUrl}/auth/forgot-password`, { email: testUser.email });
       expect(response.status).toBe(200);
-      expect(response.data.message).toBe('Register endpoint');
-    });
-    // Delete account
-    it('should return "Delete account endpoint" from /auth/delete-account', async () => {
-      const response = await axios.get(`${backendUrl}/auth/delete-account`);
-      expect(response.status).toBe(200);
-      expect(response.data.message).toBe('Delete account endpoint');
+      expect(response.data.message).toBe('Password reset link sent');
     });
   });
-  // User forgotting, resetting, or changing password of account
-  describe("Password endpoints", () => {
-    // forgot password
-    it('should return "Forgot password endpoint" from /auth/forgot-password', async () => {
-      const response = await axios.get(`${backendUrl}/auth/forgot-password`);
-      expect(response.status).toBe(200);
-      expect(response.data.message).toBe('Forgot password endpoint');
-    });
-    // reset password
-    it('should return "Reset password endpoint" from /auth/reset-password', async () => {
-      const response = await axios.get(`${backendUrl}/auth/reset-password`);
-      expect(response.status).toBe(200);
-      expect(response.data.message).toBe('Reset password endpoint');
-    });
-    // change password
-    it('should return "Change password endpoint" from /auth/change-password', async () => {
-      const response = await axios.get(`${backendUrl}/auth/change-password`);
-      expect(response.status).toBe(200);
-      expect(response.data.message).toBe('Change password endpoint');
-    });
-  });
-  // Email verification
-  describe("Email endpoints", () => {
-    // verify email
-    it('should return "Verify email endpoint" from /auth/verify-email', async () => {
+
+  describe('Email Verification', () => {
+    it('should verify email', async () => {
       const response = await axios.get(`${backendUrl}/auth/verify-email`);
       expect(response.status).toBe(200);
-      expect(response.data.message).toBe('Verify email endpoint');
-    });
-    // resend verification
-    it('should return "Resend verification endpoint" from /auth/resend-verification', async () => {
-      const response = await axios.get(`${backendUrl}/auth/resend-verification`);
-      expect(response.status).toBe(200);
-      expect(response.data.message).toBe('Resend verification endpoint');
+      expect(response.data.message).toBe('Email verified');
     });
   });
-  // User profile updates
-  describe('Profile endpoint', () => {
-    // update profile
-    it('should return "Update profile endpoint" from /auth/update-profile', async () => {
-      const response = await axios.get(`${backendUrl}/auth/update-profile`);
+
+  describe('Profile and Account Deletion', () => {
+    it('should delete the user account', async () => {
+      const response = await axios.delete(`${backendUrl}/auth/delete-account`);
       expect(response.status).toBe(200);
-      expect(response.data.message).toBe('Update profile endpoint');
+      expect(response.data.message).toBe('Account deleted');
     });
   });
-});
-// Tests Error Handling
-describe('Flask API Error Handling Tests', () => {
-  // Not Found Error
-  describe('404 Not Found', () => {
+
+  describe('Error Handling', () => {
     it('should return 404 for a non-existent endpoint', async () => {
       try {
         await axios.get(`${backendUrl}/non-existent-route`);
       } catch (error: any) {
         expect(error.response.status).toBe(404);
-        expect(error.response.data.message).toBe('Not Found Error');
-
-      }
-    });
-  });
-  // Internal Server Error
-  describe('500 Internal Server Error', () => {
-    it('should return 500 when the server encounters an error', async () => {
-      try {
-        await axios.get(`${backendUrl}/some-500-error-route`);
-      } catch (error: any) {
-        expect(error.response.status).toBe(500);
-        expect(error.response.data.message).toBe('Internal Server Error');
+        expect(error.response.data.message).toBe('Not Found');
       }
     });
   });

@@ -41,4 +41,14 @@ So far, we have completed the Figma design for the UI, and initialized the React
 Our plan for this week is to set up the backend. And then containerize the frontend, backend, and database, and ensure communication between all three.
 
 ## Sprint 1, Week 1 (Febuary 19 - 26) - Progress Report
-Nect expected project update on the 26th
+This week we containerized and dockerized the frontend, backend and database
+
+Our plan for next week is to set up the sign in page, start user authentication for the sign in page
+
+## Sprint 1, Week 2 (Febuary 26 - March 4) - Progress Report
+This week we completed the sign in page, and also the user authentication and now all three, frontend, backend, database are functional and talking to each other.
+
+Our plan for next week is to start implimenting the API calls and information into the database and complete the homepage and bar to choose which page you are on for the frontend 
+
+## Sprint 2, Week 1 (March 4 - March 11) - Progress Report
+To be continued ... 

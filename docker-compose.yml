@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     build:
@@ -10,7 +12,7 @@ services:
     ports:
       - "3308:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql  # Reference to named volume
     container_name: MySQLDatabase
 
   backend:
@@ -19,8 +21,8 @@ services:
     restart: always
     environment:
       FLASK_ENV: development
-      FLASK_APP: app.py
-      DATABASE_URL: mysql+pymysql://root:team3@db:3306/march_madness_betting
+      SECRET_KEY: "your_secret_key"
+      SQLALCHEMY_DATABASE_URI: "mysql://root:team3@db:3306/march_madness_betting"
     depends_on:
       - db
     ports:
@@ -31,12 +33,13 @@ services:
     build: ./src/frontend-mm_app
     restart: always
     environment:
-      VITE_BACKEND_URL: http://localhost:6000
+      VITE_BACKEND_URL: http://backend:8000
     depends_on:
       - backend
     ports:
       - "3000:5173"
     container_name: frontendReact
 
+# Ensure this section exists to define the named volume
 volumes:
   mysql_data:

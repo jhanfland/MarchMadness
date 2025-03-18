@@ -65,6 +65,15 @@ Potential Database Schema
 | start_time | DATETIME     | Game start time |
 | winner     | VARCHAR(255) | Winner (NULL if game sint finished) |
 
+### Bracket Table
+| Column      | Type         | Description |
+|------------|-------------|-------------|
+| user_id         | INT (PK)     | Unique ID for the user |
+| backet_id     | INT(PK) | Unique bracket ID for user |
+| picks     | JSON | JSON object for the bracket's picks |
+
+
+
 ## Potential API Endpoints
 ### Authentication
 - `POST /api/auth/register`  Register new users
