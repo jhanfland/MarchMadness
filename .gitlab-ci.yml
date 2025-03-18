@@ -39,13 +39,12 @@ services:
 #      - src/backend
 #  tags:
 #    - dind
-build_docker:
+build-docker-compose:
   stage: build
-  image: docker:latest
+  image: docker:node:18-alpine
   services:
     - docker:dind
   script:
-    - pip install docker-compose
     - docker-compose up --build
 
 #####################################
