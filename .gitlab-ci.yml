@@ -32,6 +32,8 @@ lint_backend:
   image: python
   before_script:
     - pip install -r src/backend/requirements.txt
+    - pip install black 
+    - pip install flake8
   script:
     - black ./src/backend --check --verbose --diff --color
     - flake8 ./src/backend --max-line-length=88
@@ -44,6 +46,7 @@ lint_frontend:
   before_script:
     - cd src/frontend-mm_app
     - npm install
+
   script:
     - npm run lint
   tags:
