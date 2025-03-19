@@ -117,46 +117,35 @@ test_frontend:
 #####################################
 ############## Build ################
 #####################################
-docker_compose:
+
+build_backend:
   stage: build
   image: docker:20.10.16
   services:
     - docker:20.10.16-dind
   script:
-    - sleep 10 
-    - docker-compose up --build
+    - docker build -t backend:latest ./src/backend
+  artifacts:
+    paths:
+      - src/backend
   tags:
     - dind
   allow_failure: true
 
-#build_backend:
-#  stage: build
-#  image: docker:20.10.16
-#  services:
-#    - docker:20.10.16-dind
-#  script:
-#    - docker build -t backend:latest ./src/backend
-#  artifacts:
-#    paths:
-#      - src/backend
-#  tags:
-#    - dind
-#  allow_failure: true
-
-#build_frontend:
-#  stage: build
-#  image: node:18
-#  before_script:
-#    - cd src/frontend-mm_app
-#    - npm install
-#  script:
-#    - npm run build
-#  artifacts:
-#    paths:
-#      - src/frontend-mm_app/dist
-#  tags:
-#    - dind
-#  allow_failure: true
+build_frontend:
+  stage: build
+  image: node:18
+  before_script:
+    - cd src/frontend-mm_app
+    - npm install
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - src/frontend-mm_app/dist
+  tags:
+    - dind
+  allow_failure: true
 
 #####################################
 ########## Build & Release ##########
