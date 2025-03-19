@@ -19,6 +19,8 @@ services:
     build:
       context: ./src/backend
     restart: always
+    env_file:
+      - .env
     environment:
       FLASK_ENV: development
       SECRET_KEY: "your_secret_key"

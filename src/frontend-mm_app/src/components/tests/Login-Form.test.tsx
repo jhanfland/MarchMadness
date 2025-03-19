@@ -1,12 +1,17 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { LoginForm } from "../../Pages/Login-Form";
 import { describe, it, expect } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 
 // Test for Login form
 describe("LoginForm Component", () => {
   // Test surrounding form element
   it("renders Login form and ensures functionality", () => {
-    render(<LoginForm />);
+    render(
+      <MemoryRouter >
+        <LoginForm />
+      </MemoryRouter>
+    );
 
     // Check if the form elements are rendered.
     const emailInput = screen.getByLabelText("Email");
