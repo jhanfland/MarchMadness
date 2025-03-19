@@ -41,11 +41,11 @@ lint_backend:
   #Use --ignore=<errors> to ignore certain errors
     - set +e
     - black ./src/backend --skip-string-normalization --check --verbose --diff --color > black_linting.txt
-    - flake8 ./src/backend --max-line-length=80 --count > flake8.txt 
+    - flake8 ./src/backend --max-line-length=80 --count > flake8_linting.txt 
   artifacts:
     paths:
-      -black_linting.txt
-      -flake8.txt 
+      - black_linting.txt
+      - flake8_linting.txt 
   tags:
     - dind
   allow_failure: true
