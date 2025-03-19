@@ -21,7 +21,7 @@ variables:
 ############## Services #############
 #####################################
 services:
-  - name: docker:did
+  - name: docker:dind
     alias: docker
 
 #####################################
