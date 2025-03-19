@@ -21,7 +21,7 @@ variables:
 ############## Services #############
 #####################################
 services:
-  - name: docker:dind
+  - name: docker:20.10.16-dind
     alias: docker
 
 #####################################
@@ -90,6 +90,7 @@ test_backend:
     - pip install -r src/backend/requirements.txt
     - sleep 10  # Give MySQL time to initialize
     #- python -m flask db upgrade  # Apply migrations
+    - nmp install
   script:
     - npm run --prefix .\src\integration-tests\tests
   tags:
