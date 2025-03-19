@@ -94,7 +94,7 @@ test_backend:
   before_script:
     - pip install -r src/backend/requirements.txt
     - sleep 10  # Give MySQL time to initialize
-    #- python -m flask db upgrade  # Apply migrations
+    - python -m flask db upgrade  # Apply migrations
     - pip install npm run
   script:
     - npm run --prefix .\src\integration-tests\tests
@@ -109,7 +109,7 @@ test_frontend:
     - cd src/frontend-mm_app
     - pip install npm
   script:
-    - npm test -- --coverage
+    - npm test --prefix .\src\frontend-mm_app
   tags:
     - dind
   allow_failure: true
