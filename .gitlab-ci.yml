@@ -148,7 +148,7 @@ build_frontend:
   allow_failure: true
 
 #####################################
-########## Build & Release ##########
+########## Release ##################
 #####################################
 release:
   stage: release
