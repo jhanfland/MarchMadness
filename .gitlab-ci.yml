@@ -29,11 +29,12 @@ services:
 #####################################
 lint_backend:
   stage: lint
-  image: python
+  image: python:3.9
   before_script:
     - pip install -r src/backend/requirements.txt
     - pip install black 
     - pip install flake8
+    - pip install npm
   script:
   #The following are links to linting docs
   #https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#
@@ -52,7 +53,7 @@ lint_backend:
 
 lint_frontend:
   stage: lint
-  image: node:18
+  image: python:3.9
   before_script:
     - cd src/frontend-mm_app
     - npm install
