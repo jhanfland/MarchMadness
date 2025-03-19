@@ -35,9 +35,13 @@ lint_backend:
     - pip install black 
     - pip install flake8
   script:
+  #The following are links to linting docs
+  #https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#
+  #https://flake8.pycqa.org/en/latest/user/options.html
+  #Use --ignore=<errors> to ignore certain errors
     - set +e
-    - black ./src/backend --check --verbose --diff --color
-    - flake8 ./src/backend --max-line-length=88
+    - black ./src/backend -S --check --verbose --diff --color
+    - flake8 ./src/backend --max-line-length=80 --count
   tags:
     - dind
   allow_failure: true
@@ -65,6 +69,8 @@ static_analysis_backend:
     - pip install -r src/backend/requirements.txt
     - pip install mypy
   script:
+    #The following is a link to static analysis docs
+    #https://mypy.readthedocs.io/en/latest/command_line.html
     - mypy src/backend
   tags:
     - dind
