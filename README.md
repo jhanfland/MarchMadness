@@ -51,4 +51,11 @@ This week we completed the sign in page, and also the user authentication and no
 Our plan for next week is to start implimenting the API calls and information into the database and complete the homepage and bar to choose which page you are on for the frontend 
 
 ## Sprint 2, Week 1 (March 4 - March 11) - Progress Report
-To be continued ... 
+Going into sprint 2, our team was able to clear out a majority of the issues from sprint 1, leaving the "update STYLEmd" as the only remaining issue that is left open from sprint 1. This week we were able to implement the website homepage, which has a user-friendly interface and closely followed our Figma design. 
+
+Our plan for next week is to create a frontend skeleton for our bracket and have it work with the backend API call. Additionally we want to set up our production container and create a CI/CD pipeline, while continuing to update documentation as needed. 
+
+## Sprint 2, Week 1 (March 11 - March 18) - Progress Report
+This week we were able to complete the bracket skeleton, and we created our backend bracket functionality with the proper API calls. We also restructued some of the website functionality, and updated our dev container so that it would dynamically update our website when we made changes in frontend. 
+
+Ideally, our plan for next week is to have a functioning bracket that has all the march madness teams and all their respective information (seeding, matchup, region, game start, etc). This will require some additional work in both our frontend, backend, and testing.

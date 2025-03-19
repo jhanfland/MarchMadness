@@ -1,4 +1,4 @@
-import dunkingImg from "../../public/basketball.jpg";
+import dunkingImg from "/basketball.jpg";
 import { Link } from "react-router-dom";
 
 export default function Homepage() {
@@ -8,8 +8,8 @@ export default function Homepage() {
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: "url('../../public/basketballcourt.jpg')",
-          opacity: 0.09,
+          backgroundImage: "url('basketballcourt.jpg')",
+          opacity: 0.1,
         }}
       ></div>
 
