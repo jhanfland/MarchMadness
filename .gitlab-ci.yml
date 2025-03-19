@@ -40,8 +40,12 @@ lint_backend:
   #https://flake8.pycqa.org/en/latest/user/options.html
   #Use --ignore=<errors> to ignore certain errors
     - set +e
-    - black ./src/backend --skip-string-normalization --check --verbose --diff --color
-    - flake8 ./src/backend --max-line-length=80 --count
+    - black ./src/backend --skip-string-normalization --check --verbose --diff --color > black_linting.txt
+    - flake8 ./src/backend --max-line-length=80 --count > flake8.txt 
+  artifacts:
+    paths:
+      -black_linting.txt
+      -flake8.txt 
   tags:
     - dind
   allow_failure: true
@@ -90,7 +94,7 @@ test_backend:
     - pip install -r src/backend/requirements.txt
     - sleep 10  # Give MySQL time to initialize
     #- python -m flask db upgrade  # Apply migrations
-    - nmp install
+    - npm install
   script:
     - npm run --prefix .\src\integration-tests\tests
   tags:
