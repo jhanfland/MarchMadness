@@ -69,10 +69,20 @@ def create_user_bracket():
 
 # User Verification
 def verify_user():
-    user_id = session.get('id')
-    if not user_id:
-        return None, jsonify({'error': 'User not authenticated'}), 401
-    
+    # Extract the token from the Authorization header
+    auth_header = request.headers.get('Authorization')
+    if not auth_header:
+        return None, jsonify({'error': 'Authorization header missing'}), 401
+
+    # The token should be in the form 'Bearer <token>'
+    token = auth_header.split(" ")[1] if len(auth_header.split()) > 1 else None
+    if not token:
+        return None, jsonify({'error': 'Token missing'}), 401
+
+    # Use the token as the user ID (or replace with your preferred method)
+    user_id = token
+
+    # Retrieve the user from the database using the provided user_id
     user = User.query.get(user_id)
     if not user:
         return None, jsonify({'error': 'User not found'}), 404
