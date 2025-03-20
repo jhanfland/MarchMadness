@@ -18,14 +18,14 @@ describe("Flask API Tests - Bracket", () => {
         authToken = loginResponse.data.token;
     });
 
-    // describe("Live Tournament Bracket", () => {
-    //     it("should retrieve the live tournament bracket", async () => {
-    //         const response = await axios.get(`${backendUrl}/get_bracket`);
-    //         expect(response.status).toBe(200);
-    //         expect(response.data).toHaveProperty("rounds");
-    //         expect(Array.isArray(response.data.rounds)).toBe(true);
-    //     });
-    // });
+    describe("Live Tournament Bracket", () => {
+        it("should retrieve the live tournament bracket", async () => {
+            const response = await axios.get(`${backendUrl}/get_bracket`);
+            expect(response.status).toBe(200);
+            expect(response.data).toHaveProperty("rounds");
+            expect(Array.isArray(response.data.rounds)).toBe(true);
+        });
+    });
 
     describe("User Bracket Management", () => {
         let testBracket = {
@@ -40,24 +40,30 @@ describe("Flask API Tests - Bracket", () => {
             }
         };
 
-        // it("should return 404 for a non-existent user bracket", async () => {
-        //     try {
-        //         await axios.get(`${backendUrl}/get_user_bracket/999`);
-        //     } catch (error: any) {
-        //         expect(error.response.status).toBe(404);
-        //         expect(error.response.data.error).toBe("Bracket not found");
-        //     }
-        // });
+        it("should return 404 for a non-existent user bracket", async () => {
+            try {
+                await axios.get(`${backendUrl}/get_user_bracket/999`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+            } catch (error: any) {
+                expect(error.response.status).toBe(404);
+                expect(error.response.data.error).toBe("Bracket not found");
+            }
+        });
 
         it("should create a new user bracket", async () => {
-            const response = await axios.post(`${backendUrl}/create_user_bracket`, testBracket);
+            const response = await axios.post(`${backendUrl}/create_user_bracket`, testBracket, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
             expect(response.status).toBe(201);
             expect(response.data.message).toBe("Bracket created successfully");
             expect(response.data.bracket).toEqual(testBracket.bracket_selection);
         });
 
         it("should retrieve an existing user bracket", async () => {
-            const response = await axios.get(`${backendUrl}/get_user_bracket`);
+            const response = await axios.get(`${backendUrl}/get_user_bracket/1`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
             expect(response.status).toBe(200);
             expect(response.data.message).toBe("Bracket retrieved successfully");
             expect(response.data.bracket).toHaveProperty("rounds");
@@ -70,7 +76,9 @@ describe("Flask API Tests - Bracket", () => {
                 rounds: [{ name: "First Round", games: ["Updated Game"] }],
                 },
             };
-            const response = await axios.post(`${backendUrl}/create_user_bracket`, updatedBracket);
+            const response = await axios.post(`${backendUrl}/create_user_bracket`, updatedBracket, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
             expect(response.status).toBe(200);
             expect(response.data.message).toBe("Bracket updated successfully");
             expect(response.data.bracket).toEqual(updatedBracket.bracket_selection);

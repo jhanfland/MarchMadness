@@ -16,12 +16,18 @@ Stores user bets on games, including the bet amount, type, odds, and status.
 ### **4. `bracket` Table**
 Stores users' bracket selections in JSON format, with a reference to each user.
 
+### DATABASE TABLES DO NOT UPDATE. MUST REMOVE AND REBUILD DOCKER CONTAINER
+
 ## Commands
+
+To Remove Container:
+1. docker volume ls
+2. docker volume rm project_03_mysql_data
 
 To update db dump:
 
 docker cp path/to/your/database_dump.sql MySQLDatabase:/tmp/database_dump.sql
 docker exec -it MySQLDatabase mysql -u root -p 
-** Enter Password ** 
+** Enter Password ** : team3
 USE march_madness_betting;
 source /tmp/database_dump.sql;

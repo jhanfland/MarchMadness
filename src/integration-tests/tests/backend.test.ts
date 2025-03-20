@@ -23,7 +23,7 @@ describe('Flask API Tests', () => {
 
     it('should not log in with incorrect credentials', async () => {
       try {
-        await axios.post(`${backendUrl}/auth/login`, { email: testUser.email, password: "password" });
+        await axios.post(`${backendUrl}/auth/login`, { email: testUser.email, password: "wrongpassword" });
       } catch (error: any) {
         expect(error.response.status).toBe(401);
         expect(error.response.data.error).toBe('Invalid email or password.');
