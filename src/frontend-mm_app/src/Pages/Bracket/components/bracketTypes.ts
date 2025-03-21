@@ -18,7 +18,7 @@ export type Team = {
   export type Bracket = {
     id: number;
     title: string;
-    round?:Round[];
+    rounds?:Round[];
     regions?: Record<Region, Seed[]>;
   };
 
