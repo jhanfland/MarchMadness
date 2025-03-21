@@ -5,8 +5,11 @@ import { Bracket as ReactBracket, RoundProps } from 'react-brackets';
 
 
 export default function Bracket({ bracket }: BracketType) {
-    console.log("Bracket within bracket page", bracket)
+    // if (bracket.length == 0) {
+    //     return <div />
+    // }
     const [selectedRegion, setSelectedRegion] = useState<Region>("EAST");
+    console.log("bracket within page", bracket)
 
     const rounds: RoundProps[] = bracket[0].rounds
     // [

@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes} from 'react-router-dom'; // Imp
 import BracketPage from "./Pages/Bracket/BracketPage";
 import Navbar from './components/navbar';
 import Homepage from './Pages/Homepage';
+import LiveBracketPage from './Pages/Bracket/liveBracketPage';
 
 // Main App component with React Router integrated
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/bracket" element={<BracketPage />} />
+        <Route path="/liveBracket" element={<LiveBracketPage />} />
       </Routes>
     </Router>
   );
