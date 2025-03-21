@@ -128,14 +128,13 @@ export default function BracketPage() {
       if (!API.ok) throw new Error("Failed to get bracket");
       /* saves data to react */
       const data = await API.json();
-
       /* update list of brackets and create bracket */
       setBrackets(prev => [...prev, {
         id: data.id,
         title: data.title,
         regions: data.regions as Record<string, Seed[]>,
       }]);
-      console.log(brackets); 
+      setLoading(false)
     } catch (err) {
       console.error("Error with creating bracket:", err);
       setError("Failed to generate bracket.");
@@ -151,7 +150,7 @@ export default function BracketPage() {
         <ul>
           {brackets.map((bracket, index) => (
             <li key={index} className="mb-2 border p-2 rounded">
-              <Bracket bracket={brackets} />
+              <Bracket bracket={bracket} liveBracket={false} />
             </li>
           ))}
         </ul>

@@ -55,7 +55,6 @@ export default function LiveBracketPage() {
         setLiveBracket([bracketObj]);
     };
 
-    console.log("please show hit");
 
     useEffect(() => {
         function grab_live_bracket_info() {
@@ -69,10 +68,8 @@ export default function LiveBracketPage() {
                 return response.json();
             })
             .then((data) => {
-                console.log("data", data)
                 formatDataIntoBracketStructure(data);
                 setLoading(false);
-                console.log("live bracket", liveBracket)
             })
             .catch((err) => {
                 console.error("Error fetching brackets:", err);
@@ -83,7 +80,7 @@ export default function LiveBracketPage() {
 
     return (
         <div>
-            {loading ? <p>Loading brackets...</p> : <Bracket bracket={liveBracket} />}
+            {loading ? <p>Loading brackets...</p> : <Bracket bracket={liveBracket} liveBracket={true} />}
         </div>
     );
 }

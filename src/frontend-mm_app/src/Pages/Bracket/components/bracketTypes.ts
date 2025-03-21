@@ -19,7 +19,7 @@ export type Team = {
     id: number;
     title: string;
     round?:Round[];
-    reigons?: Record<Region, Seed[]>;
+    regions?: Record<Region, Seed[]>;
   };
 
   
