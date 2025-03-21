@@ -2,57 +2,60 @@ import { useState } from "react";
 import { Bracket as BracketType, Region } from "@/Pages/Bracket/components/bracketTypes";
 import { Bracket as ReactBracket, RoundProps } from 'react-brackets';
 
-const rounds: RoundProps[] = [
-  {
-    title: 'Round one',
-    seeds: [
-      {
-        id: 1,
-        date: new Date().toDateString(),
-        teams: [{ name: 'Team A' }, { name: 'Team B' }],
-      },
-      {
-        id: 2,
-        date: new Date().toDateString(),
-        teams: [{ name: 'Team C' }, { name: 'Team D' }],
-      },
-    ],
-  },
-  {
-    title: 'Round two',
-    seeds: [
-      {
-        id: 3,
-        date: new Date().toDateString(),
-        teams: [{ name: 'Team A' }, { name: 'Team C' }],
-      },
-    ],
-  },
-  {
-    title: 'Round Three',
-    seeds: [
-      {
-        id: 3,
-        date: new Date().toDateString(),
-        teams: [{ name: 'Team A' }, { name: 'Team C' }],
-      },
-    ],
-  },
-  {
-    title: 'Round Four',
-    seeds: [
-      {
-        id: 3,
-        date: new Date().toDateString(),
-        teams: [{ name: 'Team D' }, { name: 'Team Z' }],
-      },
-    ],
-  },
-];
 
 
 export default function Bracket({ bracket }: BracketType) {
+    console.log("Bracket within bracket page", bracket)
     const [selectedRegion, setSelectedRegion] = useState<Region>("EAST");
+
+    const rounds: RoundProps[] = bracket[0].rounds
+    // [
+    //   {
+    //     title: 'Round one',
+    //     seeds: [
+    //       {
+    //         id: 1,
+    //         date: new Date().toDateString(),
+    //         teams: [{ name: 'Team A' }, { name: 'Team B' }],
+    //       },
+    //       {
+    //         id: 2,
+    //         date: new Date().toDateString(),
+    //         teams: [{ name: 'Team C' }, { name: 'Team D' }],
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     title: 'Round two',
+    //     seeds: [
+    //       {
+    //         id: 3,
+    //         date: new Date().toDateString(),
+    //         teams: [{ name: 'Team A' }, { name: 'Team C' }],
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     title: 'Round Three',
+    //     seeds: [
+    //       {
+    //         id: 3,
+    //         date: new Date().toDateString(),
+    //         teams: [{ name: 'Team A' }, { name: 'Team C' }],
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     title: 'Round Four',
+    //     seeds: [
+    //       {
+    //         id: 3,
+    //         date: new Date().toDateString(),
+    //         teams: [{ name: 'Team D' }, { name: 'Team Z' }],
+    //       },
+    //     ],
+    //   },
+    // ];
 
     return (
         <div> 

@@ -12,7 +12,7 @@ bracket_bp = Blueprint('bracket', __name__)
 @bracket_bp.route('/get_bracket', methods=['GET'])
 def get_realtime_bracket():
     # switch out mm_tournament_id, with prev_mm_tournament_id dependent on what you need to understand/use
-    url = f"https://api.sportradar.com/ncaamb/trial/v8/en/tournaments/{prev_mm_tournament_id}/schedule.json?api_key={api_key}"
+    url = f"https://api.sportradar.com/ncaamb/trial/v8/en/tournaments/{mm_tournament_id}/schedule.json?api_key={api_key}"
     headers = {"accept": "application/json"}
     response = requests.get(url, headers=headers)
     return jsonify(response.json())

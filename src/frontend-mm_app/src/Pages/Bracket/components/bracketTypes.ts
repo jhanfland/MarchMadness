@@ -7,6 +7,7 @@ export type Team = {
     id: number;
     date?: string;
     teams: Team[];
+    region?: Region
   };
   
   export type Round = {
