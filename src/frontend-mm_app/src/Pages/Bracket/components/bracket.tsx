@@ -2,50 +2,30 @@ import { useState } from "react";
 import { Bracket as BracketType, Region } from "@/Pages/Bracket/components/bracketTypes";
 import { Bracket as ReactBracket, RoundProps } from 'react-brackets';
 
-const rounds: RoundProps[] = [
+const finalFourRounds: RoundProps[] = [
   {
-    title: 'Round one',
+    title: "Final Four",
     seeds: [
       {
         id: 1,
         date: new Date().toDateString(),
-        teams: [{ name: 'Team A' }, { name: 'Team B' }],
+        teams: [{ name: "East Champ" }, { name: "West Champ" }],
       },
       {
         id: 2,
         date: new Date().toDateString(),
-        teams: [{ name: 'Team C' }, { name: 'Team D' }],
+        teams: [{ name: "South Champ" }, { name: "Midwest Champ" }],
       },
     ],
   },
   {
-    title: 'Round two',
+    title: 'Championship',
     seeds: [
       {
-        id: 3,
-        date: new Date().toDateString(),
-        teams: [{ name: 'Team A' }, { name: 'Team C' }],
-      },
-    ],
-  },
-  {
-    title: 'Round Three',
-    seeds: [
-      {
-        id: 3,
-        date: new Date().toDateString(),
-        teams: [{ name: 'Team A' }, { name: 'Team C' }],
-      },
-    ],
-  },
-  {
-    title: 'Round Four',
-    seeds: [
-      {
-        id: 3,
+        id: 1,
         date: new Date().toDateString(),
         teams: [{ name: 'Team D' }, { name: 'Team Z' }],
-      },
+      }
     ],
   },
 ];
@@ -57,9 +37,10 @@ export default function Bracket({ bracket }: BracketType) {
     return (
         <div> 
             <p> {bracket.title} </p>
-            <ReactBracket rounds={rounds} />
+            <ReactBracket rounds={ selectedRegion === "FINAL FOUR" ? finalFourRounds : [
+              { title: "Round of 64", seeds: bracket.regions[selectedRegion] ?? [], }, ] } />
             <div className="flex gap-5"> 
-                {(["EAST", "WEST", "SOUTH", "MIDWEST"] as Region[]).map((region) => (
+                {(["EAST", "WEST", "SOUTH", "MIDWEST", "FINAL FOUR"] as Region[]).map((region) => (
                     <button 
                         key={region}
                         onClick={() => setSelectedRegion(region)}

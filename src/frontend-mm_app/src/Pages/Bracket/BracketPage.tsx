@@ -1,10 +1,10 @@
 import Bracket from "@/Pages/Bracket/components/bracket";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { Bracket as BracketType } from "@/Pages/Bracket/components/bracketTypes";
+import { Bracket as BracketType, Seed } from "@/Pages/Bracket/components/bracketTypes";
 
 // Create a default empty bracket for March Madness with all rounds.
-const emptyBracket: BracketType = {
+/*const emptyBracket: BracketType = {
   id: Date.now(), 
   title: "New March Madness Bracket",
   rounds: [
@@ -15,7 +15,7 @@ const emptyBracket: BracketType = {
     { title: "Final Four", seeds: [] },
     { title: "National Championship", seeds: [] },
   ],
-};
+}; */
 
 export default function BracketPage() {
   const [brackets, setBrackets] = useState<BracketType[]>([]);
@@ -31,34 +31,38 @@ export default function BracketPage() {
       return;
     }
 
-    // Uncomment and update when backend is ready:
-    /*
-    fetch("http://localhost:8000/getBrackets", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch brackets");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setBrackets(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching brackets:", err);
-        setError(err.message);
-        setLoading(false);
-      });
-    */
     // For now, stop the loading indicator.
     setLoading(false);
   }, []);
+
+  /* async function to wait for backend */
+  const createBracket = async () => {
+    const token = localStorage.getItem("token");
+    /* try block - GET request to backend */
+    try {
+      const API = await fetch("http://localhost:8000/generate_bracket_template", {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+      /* needs 200 response (.ok is boolean for 200) */
+      if (!API.ok) throw new Error("Failed to get bracket");
+      /* saves data to react */
+      const data = await API.json();
+
+      /* update list of brackets and create bracket */
+      setBrackets(prev => [...prev, {
+        id: data.id,
+        title: data.title,
+        regions: data.regions as Record<string, Seed[]>,
+      }]);
+      console.log(brackets); 
+    } catch (err) {
+      console.error("Error with creating bracket:", err);
+      setError("Failed to generate bracket.");
+    }
+  };
 
   return (
     <div className="p-4">
@@ -77,7 +81,7 @@ export default function BracketPage() {
         !loading && !error && <p>No brackets found.</p>
       )}
       <Button
-        onClick={() => setBrackets((prev) => [...prev, emptyBracket])}
+        onClick={createBracket}
         className="bg-[var(--primary-color)] font-bold hover:bg-blue-900 mt-4"
       >
         CREATE NEW BRACKET
