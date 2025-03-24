@@ -1,15 +1,16 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 export default function Navbar() {
   const [token, setToken] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Check for token on component mount
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     setToken(storedToken);
-  }, []);
+  }, [location]);
 
   // Sign out handler removes token and navigates to home
   const handleSignOut = () => {
