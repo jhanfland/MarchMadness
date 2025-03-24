@@ -7,6 +7,7 @@ export type Team = {
     id: number;
     date?: string;
     teams: Team[];
+    region?: Region
   };
   
   export type Round = {
@@ -17,8 +18,9 @@ export type Team = {
   export type Bracket = {
     id: number;
     title: string;
-    rounds: Round[];
+    rounds?:Round[];
+    regions?: Record<Region, Seed[]>;
   };
 
   
-export type Region = "EAST" | "WEST" | "SOUTH" | "MIDWEST";
+export type Region = "EAST" | "WEST" | "SOUTH" | "MIDWEST" | "FINAL FOUR";

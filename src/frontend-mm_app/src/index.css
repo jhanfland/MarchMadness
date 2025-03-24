@@ -25,7 +25,7 @@ a:hover {
 }
 
 body {
-  background-color: #121619; /*fixes issue 61*/
+  background-color: var(--background); /*fixes issue 61*/
   color: white;
 }
 

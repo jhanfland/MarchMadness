@@ -24,6 +24,7 @@ export default function Navbar() {
       <div className="bg-blue-600 ml-8 w-16 h-16 rounded-full" />
       <div className="ml-auto flex gap-20 mr-1 p-2 font-medium items-center">
         <Link to="/">Home</Link>
+        <Link to="/liveBracket">Live Bracket</Link>
         <Link to="/bracket">My Brackets</Link>
         <Link to="/scores">Scores</Link>
         <Link to="/news">News</Link>

@@ -2,6 +2,7 @@ import dunkingImg from "/basketball.jpg";
 import { Link } from "react-router-dom";
 
 export default function Homepage() {
+
   return (
     <div className="relative min-h-[87vh]">
       {/* Background image layer with low opacity */}
@@ -12,8 +13,6 @@ export default function Homepage() {
           opacity: 0.1,
         }}
       ></div>
-
-
       <div className="relative flex items-center justify-center min-h-[80vh]">
         <div className="flex gap-8">
           <div className="flex flex-col gap-2 mr-9">

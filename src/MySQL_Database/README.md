@@ -26,6 +26,8 @@ To Remove Container:
 
 To update db dump:
 
+Try to remove container and rebuild it as shown above, if that does not work, do:
+
 docker cp path/to/your/database_dump.sql MySQLDatabase:/tmp/database_dump.sql
 docker exec -it MySQLDatabase mysql -u root -p 
 ** Enter Password ** : team3
