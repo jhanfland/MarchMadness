@@ -25,98 +25,18 @@ export default function BracketPage() {
 
   const token = localStorage.getItem("token");
 
+
+  useEffect(() => {
+    
+  }, [])
+
   useEffect(() => {
     console.log("Updated brackets", brackets);
-  }, [brackets]);  // This will run when `brackets` state changes
+  }, [brackets]);  
 
-  function formatDataIntoBracketStructure(data : any): any {
-    const roundObjArray: Round[] = []
-    data.rounds.forEach((round : any, idx1 : any) => {
-      // Skip the First Four
-      if (idx1 != 0) {
-        // is in bracketed information
-        const seedArray : Seed[] = [];
-        if (idx1 < 5) {
-          round.bracketed.forEach((region: any, idx2: any) => {
-            region.games.forEach((game : any, idx3: any) => {
-              // grabs team info
-              const awayTeam : Team = {name: game.away.alias };
-              const homeTeam : Team = {name: game.home.alias };
-              // puts team info into an array
-              const teamArray : Team[] = [homeTeam, awayTeam];
-              // creates info abouth the game
-              const teamInfo : Seed = {id: game.id, teams: teamArray, date: new Date(game.scheduled).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }), region: region.bracket.name.match(/^(\w+)/)?.[1].toUpperCase() || ""}
-              // pushes all seed info into an array from a selected round
-              seedArray.push(teamInfo)
-            })
-          })
-          // is in game information after the final 4
-        } else { 
-          round.games.forEach((game : any) => {
-              // grabs team info
-              const awayTeam : Team = {name: game.away.alias };
-              const homeTeam : Team = {name: game.home.alias };
-              // puts team info into an array
-              const teamArray : Team[] = [homeTeam, awayTeam];
-              // creates info abouth the game
-              const teamInfo : Seed = {id: game.id, teams: teamArray, date: new Date(game.scheduled).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-              // pushes all seed info into an array from a selected round
-              seedArray.push(teamInfo)
-          })
-        }
-        // puts all seeds from a certain round into a round object then pushes it into an array to store all rounds
-        const roundObj : Round = {title: round.name , seeds : seedArray};
-        roundObjArray.push(roundObj);
-      }
-    })
-    // will need to change id based on which bracket they have created
-    const bracketObj: BracketType = {title: data.name , id: 1, rounds: roundObjArray }
-    console.log("bracketObj", bracketObj)
-    // updated brackets object
-    if (brackets.length > 0) {
-      setBrackets(prev => [...prev, bracketObj])
-    } else {
-      setBrackets([bracketObj])
-    }
-  }
-
-  function create_raw_bracket() {
-    if (!token) {
-      setError("User is not authenticated.");
-      setLoading(false);
-      return;
-    }
-    // Uncomment and update when backend is ready:
-    fetch("http://localhost:8000/get_bracket", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch brackets");
-        }
-        return response.json();
-      })
-      .then((data) => {
-          console.log("data", data);
-          setBrackets(prev => [...prev, formatDataIntoBracketStructure(data)]);
-          setData(data);
-      })
-      .catch((err) => {
-        console.error("Error fetching brackets:", err);
-        setError(err.message);
-        setLoading(false);
-      });
-    setLoading(false);
-  }
-
-  /* async function to wait for backend */
   const createBracket = async () => {
     const token = localStorage.getItem("token");
-    /* try block - GET request to backend */
+
     try {
       const API = await fetch("http://localhost:8000/generate_bracket_template", {
         headers: {
@@ -158,7 +78,7 @@ export default function BracketPage() {
         !loading && !error && <p>No brackets found.</p>
       )}
       <Button
-        onClick={() => create_raw_bracket()}
+        onClick={() => createBracket()}
         className="bg-[var(--primary-color)] font-bold hover:bg-blue-900 mt-4"
       >
         CREATE NEW BRACKET
