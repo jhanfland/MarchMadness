@@ -18,8 +18,9 @@ export type Team = {
   export type Bracket = {
     id: number;
     title: string;
-    rounds: Round[];
+    round?:Round[];
+    reigons?: Record<Region, Seed[]>;
   };
 
   
-export type Region = "EAST" | "WEST" | "SOUTH" | "MIDWEST";
+export type Region = "EAST" | "WEST" | "SOUTH" | "MIDWEST" | "FINAL FOUR";
