@@ -94,10 +94,11 @@ test_backend:
   before_script:
     - pip install -r src/backend/requirements.txt
     - sleep 10  # Give MySQL time to initialize
-    - python -m flask db upgrade  # Apply migrations
-    - pip install npm run
+    - cd ./src/integration-tests
+    - pip install npm
+    - npm install
   script:
-    - npm run --prefix .\src\integration-tests\tests
+    - npm test
   tags:
     - dind
   allow_failure: true
@@ -106,10 +107,11 @@ test_frontend:
   stage: test
   image: python:3.9
   before_script:
-    - cd src/frontend-mm_app
+    - cd ./src/frontend-mm_app
     - pip install npm
+    - npm install 
   script:
-    - npm test --prefix .\src\frontend-mm_app
+    - npm test 
   tags:
     - dind
   allow_failure: true
@@ -134,12 +136,11 @@ build_backend:
 
 build_frontend:
   stage: build
-  image: node:18
-  before_script:
-    - cd src/frontend-mm_app
-    - npm install
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
   script:
-    - npm run build
+    - docker build -t frontend-mm_app:latest ./src/frontend-mm_app
   artifacts:
     paths:
       - src/frontend-mm_app/dist
