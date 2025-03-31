@@ -87,16 +87,15 @@ static_analysis_backend:
 #####################################
 test_backend:
   stage: test
-  image: python:3.9
+  image: node:14
   services:
     - name: mysql:latest
       alias: db
       command: [ "--default-authentication-plugin=mysql_native_password" ]
   before_script:
-    - pip install -r src/backend/requirements.txt
+    #- pip install -r src/backend/requirements.txt
     - sleep 10  # Give MySQL time to initialize
     - cd ./src/integration-tests
-    - pip install npm
     - npm install
   script:
     - npm test
@@ -109,7 +108,6 @@ test_frontend:
   image: node:14
   before_script:
     - cd ./src/frontend-mm_app
-    - pip install npm
     - npm install 
   script:
     - npm test 
