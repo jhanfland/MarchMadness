@@ -47,7 +47,7 @@ def generate_bracket_template():
         games = region.get("games", [])
         games.sort(key=lambda g: int(g.get("title", "Game 99").split("Game ")[-1]))            
             # Build a Seed - one of 8 games in reigon
-        for game_index, game in enumerate(games):            # Build a Seed - one of 8 games in reigon
+        for game_index, game in enumerate(games):
             seed = {
                 "id": game_index + 1,
                 "date": game.get("scheduled", ""),
