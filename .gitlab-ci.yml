@@ -4,8 +4,8 @@
 stages:
   - lint
   - static_analysis
-  - test
   - build
+  - test
   - release
 
 variables:
@@ -83,6 +83,38 @@ static_analysis_backend:
   allow_failure: true
 
 #####################################
+############## Build ################
+#####################################
+
+build_backend:
+  stage: build
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  script:
+    - docker build -t backend:latest ./src/backend
+  artifacts:
+    paths:
+      - src/backend
+  tags:
+    - dind
+  allow_failure: true
+
+build_frontend:
+  stage: build
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  script:
+    - docker build -t frontend-mm_app:latest ./src/frontend-mm_app
+  artifacts:
+    paths:
+      - src/frontend-mm_app/dist
+  tags:
+    - dind
+  allow_failure: true
+
+#####################################
 ############## Testing ##############
 #####################################
 test_backend:
@@ -111,38 +143,6 @@ test_frontend:
     - npm install 
   script:
     - npm test 
-  tags:
-    - dind
-  allow_failure: true
-
-#####################################
-############## Build ################
-#####################################
-
-build_backend:
-  stage: build
-  image: docker:20.10.16
-  services:
-    - docker:20.10.16-dind
-  script:
-    - docker build -t backend:latest ./src/backend
-  artifacts:
-    paths:
-      - src/backend
-  tags:
-    - dind
-  allow_failure: true
-
-build_frontend:
-  stage: build
-  image: docker:20.10.16
-  services:
-    - docker:20.10.16-dind
-  script:
-    - docker build -t frontend-mm_app:latest ./src/frontend-mm_app
-  artifacts:
-    paths:
-      - src/frontend-mm_app/dist
   tags:
     - dind
   allow_failure: true
