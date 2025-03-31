@@ -161,7 +161,7 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
     }
 
     setRounds(newRounds);
-  }, [bracket, selectedRegion, selectedTeams]);
+  }, [bracket, selectedTeams, selectedRegion]);
 
   useEffect(() => {
     const regionOrder = ["EAST", "WEST", "SOUTH", "MIDWEST"];
