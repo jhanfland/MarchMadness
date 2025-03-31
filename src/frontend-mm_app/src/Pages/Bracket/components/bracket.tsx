@@ -86,6 +86,10 @@ const CustomSeed = ({
 export default function Bracket({ bracket, liveBracket }: BracketProps) {
   const [selectedRegion, setSelectedRegion] = useState<Region>("EAST");
 
+  const [selectedTeams, setSelectedTeams] = useState<Record<string, string>>({});
+
+  const [rounds, setRounds] = useState<Round[]>([]);
+
   const [finalFourRounds, setFinalFourRounds] = useState<Round[]>([
     {
       title: "Final Four",
@@ -93,12 +97,12 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
         {
           id: 1,
           date: new Date().toDateString(),
-          teams: [{ name: "East Champ" }, { name: "West Champ" }],
+          teams: [{ name: "East Champ" }, { name: "Midwest Champ" }],
         },
         {
           id: 2,
           date: new Date().toDateString(),
-          teams: [{ name: "South Champ" }, { name: "Midwest Champ" }],
+          teams: [{ name: "South Champ" }, { name: "West Champ" }],
         },
       ],
     },
@@ -114,40 +118,24 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
     },
   ]);
 
-  const [rounds, setRounds] = useState<Round[]>([
-    {
-      title: "Round of 64",
-      seeds: bracket?.regions?.[selectedRegion] ?? [],
-    },
-    {
-      title: "Round of 32",
-      seeds: genSeeds(4),
-    },
-    {
-      title: "Sweet 16",
-      seeds: genSeeds(2),
-    },
-    {
-      title: "Elite 8",
-      seeds: genSeeds(1),
-    },
-  ]);
-
-  const [selectedTeams, setSelectedTeams] = useState<Record<string, string>>(
-    {}
-  );
-  /* example selectedTeams
-  {
-    roundIndex-SeedIndex-Region : teamname-seedID- (0 = first team | 1 = second team)  
-    1-2-EAST : Wisconsin-2-0 
-  }
-
-  */
-
+  // updates everytime reigon changes
   useEffect(() => {
-    const newRounds: Round[] = [rounds[0]]; // Keep the first round as is
+    // tests to make sure code doesn't crash or overwrite
+    if (!bracket?.regions?.[selectedRegion]) return;
+    if (selectedRegion === "FINAL FOUR") return;
 
-    for (let i = 1; i < rounds.length; i++) {
+    // uses the bracket reigons to build the baseSeeds for rnd 64
+    const baseSeeds = bracket.regions[selectedRegion];
+
+    const newRounds: Round[] = [
+      {
+        title: "Round of 64",
+        seeds: baseSeeds,
+      },
+    ];
+
+    // creates other 3 rounds
+    for (let i = 1; i < 4; i++) {
       const prevSeeds = newRounds[i - 1].seeds;
       const nextSeeds: SeedType[] = [];
 
@@ -164,15 +152,16 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
         });
       }
 
+      // add other rounds with seeds to bracket
       newRounds.push({
-        title: rounds[i].title,
+        title:
+          i === 1 ? "Round of 32" : i === 2 ? "Sweet 16" : "Elite 8",
         seeds: nextSeeds,
       });
-
     }
 
     setRounds(newRounds);
-  }, [selectedTeams, selectedRegion]);
+  }, [bracket, selectedRegion, selectedTeams]);
 
   useEffect(() => {
     const regionOrder = ["EAST", "WEST", "SOUTH", "MIDWEST"];
@@ -199,11 +188,11 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
     // Step 2: Set Final Four matchups
     updatedFinalFour[0].seeds[0].teams = [
       { name: regionWinners["EAST"] },
-      { name: regionWinners["WEST"] },
+      { name: regionWinners["MIDWEST"] },
     ];
     updatedFinalFour[0].seeds[1].teams = [
       { name: regionWinners["SOUTH"] },
-      { name: regionWinners["MIDWEST"] },
+      { name: regionWinners["WEST"] },
     ];
   
     // Step 3: Pull semifinal winners for the Championship
@@ -223,14 +212,14 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
   
   
 
-  function genSeeds(numberOfTeams: number): SeedType[] {
+  /*function genSeeds(numberOfTeams: number): SeedType[] {
     const seeds = Array.from({ length: numberOfTeams }, (_, index) => ({
       id: index + 1,
       teams: [{ name: "TBD" }, { name: "TBD" }],
     }));
 
     return seeds;
-  }
+  }*/
 
   // either returns a live bracket or a bracket with just the first round
   function createBracket() {

@@ -35,7 +35,7 @@ def generate_bracket_template():
         return jsonify({'error': 'First Round not found'}), 404
 
     # values from API
-    region_map = {0: "EAST", 1: "WEST", 2: "SOUTH", 3: "MIDWEST"}
+    region_map = {0: "SOUTH", 1: "MIDWEST", 2: "EAST", 3: "WEST"}
 
     region_seeds = {region: [] for region in region_map.values()}
 
@@ -43,8 +43,11 @@ def generate_bracket_template():
     for i, region in enumerate(first_round.get("bracketed", [])):
         # gets from region_map
         region_name = region_map.get(i, f"Region {i}")
-        for game_index, game in enumerate(region.get("games", [])):
+        # sort games - copies Krishaan's code but in python
+        games = region.get("games", [])
+        games.sort(key=lambda g: int(g.get("title", "Game 99").split("Game ")[-1]))            
             # Build a Seed - one of 8 games in reigon
+        for game_index, game in enumerate(games):            # Build a Seed - one of 8 games in reigon
             seed = {
                 "id": game_index + 1,
                 "date": game.get("scheduled", ""),
