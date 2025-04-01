@@ -40,12 +40,12 @@ lint_backend:
   #https://flake8.pycqa.org/en/latest/user/options.html
   #Use --ignore=<errors> to ignore certain errors
     - set +e
-    - black ./src/backend --skip-string-normalization --check --verbose --diff --color > black_linting.txt
-    - flake8 ./src/backend --ignore=F401 --max-line-length=90 --count > flake8_linting.txt 
+    - black ./src/backend --skip-string-normalization --check --verbose --diff --color > black_linting_backend.txt
+    - flake8 ./src/backend --ignore=F401 --max-line-length=90 --count > flake8_linting_backend.txt 
   artifacts:
     paths:
-      - black_linting.txt
-      - flake8_linting.txt 
+      - black_linting_backend.txt
+      - flake8_linting_backend.txt 
   tags:
     - dind
   allow_failure: true
@@ -58,7 +58,10 @@ lint_frontend:
     - pip install flake8
   script:
     - set +e
-    - flake8 ./src/frontend-mm_app --ignore=E302,E722  --max-line-length=90 --count > flake8_linting.txt 
+    - flake8 ./src/frontend-mm_app --ignore=E302,E722  --max-line-length=90 --count > flake8_linting_frontend.txt 
+  artifacts:
+    paths:
+      - flake8_linting_frontend.txt 
   tags:
     - dind
   allow_failure: true
@@ -141,7 +144,6 @@ test_backend:
       command: [ "--default-authentication-plugin=mysql_native_password" ]
   before_script:
     #- pip install -r src/backend/requirements.txt
-    - docker-compose up --build 
     - sleep 10  # Give MySQL time to initialize
     - cd ./src/integration-tests
     - npm install
@@ -155,7 +157,6 @@ test_frontend:
   stage: test
   image: node:14
   before_script:
-    - docker-compose up --build 
     - cd ./src/frontend-mm_app
     - npm install 
   script:
