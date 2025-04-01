@@ -8,8 +8,9 @@ import {
 
 const BACKEND_URL = "http://localhost:8000"
 
-export default function BracketPage() {
-  const [brackets, setBrackets] = useState<BracketType[]>([]);
+export default function BracketPage({ initialBrackets = [] }: { initialBrackets?: BracketType[] }) {
+// "initialBrackets" for testability — allows tests to simulate empty or preset states without hardcoding logic (was "mockBracket" before)
+  const [brackets, setBrackets] = useState<BracketType[]>(initialBrackets);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,7 +20,13 @@ export default function BracketPage() {
     if (!token) {
       setLoading(false);
       setError("Please log in to see or create brackets");
-    } 
+    } else {
+      setLoading(false);
+    }
+    // TODO: will need to add fetch bracket logic when we can save brackets
+    // const fetchBrackets = async () => {
+    // };
+    // fetchBrackets();
   }, [token]);
 
 
