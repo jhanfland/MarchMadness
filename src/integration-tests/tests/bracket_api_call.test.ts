@@ -7,13 +7,8 @@ let authToken: string;
 describe("Flask API Tests - Bracket", () => {
 
     beforeAll(async () => {
-        // Simulate user login to get an auth token
         const testUser = { email: `test${Date.now()}@example.com`, password: "password" };
-        
-        // Register a test user
         await axios.post(`${backendUrl}/auth/register`, testUser);
-
-        // Log in to get auth token
         const loginResponse = await axios.post(`${backendUrl}/auth/login`, testUser);
         authToken = loginResponse.data.token;
     });
@@ -29,13 +24,10 @@ describe("Flask API Tests - Bracket", () => {
 
     describe("User Bracket Management", () => {
         let testBracket = {
-            "bracket_number": 1,
-            "bracket_selection": {
-                "rounds": [
-                    { 
-                        "name": "First Four", 
-                        "games": [] 
-                    }
+            bracket_number: 1,
+            bracket_selection: {
+                rounds: [
+                    { name: "First Four", games: [] }
                 ]
             }
         };
@@ -73,8 +65,8 @@ describe("Flask API Tests - Bracket", () => {
             const updatedBracket = {
                 bracket_number: 1,
                 bracket_selection: {
-                rounds: [{ name: "First Round", games: ["Updated Game"] }],
-                },
+                    rounds: [{ name: "First Round", games: ["Updated Game"] }]
+                }
             };
             const response = await axios.post(`${backendUrl}/create_user_bracket`, updatedBracket, {
                 headers: { Authorization: `Bearer ${authToken}` }
@@ -82,7 +74,15 @@ describe("Flask API Tests - Bracket", () => {
             expect(response.status).toBe(200);
             expect(response.data.message).toBe("Bracket updated successfully");
             expect(response.data.bracket).toEqual(updatedBracket.bracket_selection);
+        });
+    });
 
+    describe("Bracket Template Generator", () => {
+        it("should generate a bracket template from the API", async () => {
+            const response = await axios.get(`${backendUrl}/generate_bracket_template`);
+            expect(response.status).toBe(200);
+            expect(response.data).toHaveProperty("regions");
+            expect(Object.keys(response.data.regions).length).toBeGreaterThan(0);
         });
     });
 
