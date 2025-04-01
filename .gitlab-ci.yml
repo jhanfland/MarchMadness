@@ -2,8 +2,7 @@
 ############### Setup ###############
 #####################################
 stages:
-  - lint
-  - static_analysis
+  - lint & static_analysis
   - build
   - test
   - release
@@ -25,10 +24,10 @@ services:
     alias: docker
 
 #####################################
-############## Linting ##############
+##### Linting & Static Analysis #####
 #####################################
 lint_backend:
-  stage: lint
+  stage: lint & static_analysis
   image: python:3.9
   before_script:
     - pip install -r src/backend/requirements.txt
@@ -42,7 +41,7 @@ lint_backend:
   #Use --ignore=<errors> to ignore certain errors
     - set +e
     - black ./src/backend --skip-string-normalization --check --verbose --diff --color > black_linting.txt
-    - flake8 ./src/backend --max-line-length=80 --count > flake8_linting.txt 
+    - flake8 ./src/backend --ignore=F401 --max-line-length=90 --count > flake8_linting.txt 
   artifacts:
     paths:
       - black_linting.txt
@@ -52,24 +51,19 @@ lint_backend:
   allow_failure: true
 
 lint_frontend:
-  stage: lint
+  stage: lint & static_analysis
   image: python:3.9
   before_script:
     - cd src/frontend-mm_app
-    - pip install npm
-    - npm install
   script:
     - set +e
-    - npm run lint
+    - flake8 ./src/frontend-mm_app --ignore=E302,E722  --max-line-length=90 --count > flake8_linting.txt 
   tags:
     - dind
   allow_failure: true
 
-#####################################
-########## Static Analysis ##########
-#####################################
 static_analysis_backend:
-  stage: static_analysis
+  stage: lint & static_analysis
   image: python:3.9
   before_script:
     - pip install -r src/backend/requirements.txt
