@@ -2,10 +2,10 @@
 ############### Setup ###############
 #####################################
 stages:
-  - lint & static_analysis
+  - lint
+  - static_analysis
   - build
   - test
-  - release
 
 variables:
   RELEASE_TAG: release-$CI_PIPELINE_IID
@@ -27,7 +27,7 @@ services:
 ##### Linting & Static Analysis #####
 #####################################
 lint_backend:
-  stage: lint & static_analysis
+  stage: lint
   image: python:3.9
   before_script:
     - pip install -r src/backend/requirements.txt
@@ -51,10 +51,11 @@ lint_backend:
   allow_failure: true
 
 lint_frontend:
-  stage: lint & static_analysis
+  stage: lint
   image: python:3.9
   before_script:
     - cd src/frontend-mm_app
+    - pip install flake8
   script:
     - set +e
     - flake8 ./src/frontend-mm_app --ignore=E302,E722  --max-line-length=90 --count > flake8_linting.txt 
@@ -62,8 +63,11 @@ lint_frontend:
     - dind
   allow_failure: true
 
+#####################################
+######### Static Analysis ###########
+#####################################
 static_analysis_backend:
-  stage: lint & static_analysis
+  stage: static_analysis
   image: python:3.9
   before_script:
     - pip install -r src/backend/requirements.txt
@@ -108,44 +112,8 @@ build_frontend:
     - dind
   allow_failure: true
 
-#####################################
-############## Testing ##############
-#####################################
-test_backend:
-  stage: test
-  image: node:14
-  services:
-    - name: mysql:latest
-      alias: db
-      command: [ "--default-authentication-plugin=mysql_native_password" ]
-  before_script:
-    #- pip install -r src/backend/requirements.txt
-    - sleep 10  # Give MySQL time to initialize
-    - cd ./src/integration-tests
-    - npm install
-  script:
-    - npm test
-  tags:
-    - dind
-  allow_failure: true
-
-test_frontend:
-  stage: test
-  image: node:14
-  before_script:
-    - cd ./src/frontend-mm_app
-    - npm install 
-  script:
-    - npm test 
-  tags:
-    - dind
-  allow_failure: true
-
-#####################################
-########## Release ##################
-#####################################
 release:
-  stage: release
+  stage: build
   image: docker:20.10.16
   services:
     - docker:20.10.16-dind
@@ -160,3 +128,38 @@ release:
     - dind
   only:
     - main
+
+#####################################
+############## Testing ##############
+#####################################
+test_backend:
+  stage: test
+  image: node:14
+  services:
+    - name: mysql:latest
+      alias: db
+      command: [ "--default-authentication-plugin=mysql_native_password" ]
+  before_script:
+    #- pip install -r src/backend/requirements.txt
+    - docker-compose up --build 
+    - sleep 10  # Give MySQL time to initialize
+    - cd ./src/integration-tests
+    - npm install
+  script:
+    - npm test
+  tags:
+    - dind
+  allow_failure: true
+
+test_frontend:
+  stage: test
+  image: node:14
+  before_script:
+    - docker-compose up --build 
+    - cd ./src/frontend-mm_app
+    - npm install 
+  script:
+    - npm test 
+  tags:
+    - dind
+  allow_failure: true
