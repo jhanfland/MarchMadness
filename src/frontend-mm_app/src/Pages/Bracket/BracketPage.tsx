@@ -63,6 +63,30 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
     }
   };
 
+  const saveBracket = async (bracket: BracketType, bracketNumber: number) => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/create_user_bracket`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          bracket_number: bracketNumber,
+          bracket_selection: bracket,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to save bracket");
+      const data = await response.json();
+      console.log("Bracket saved successfully:", data);
+    } catch (err) {
+      console.error("Error saving bracket:", err);
+    }
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Brackets</h1>
@@ -72,7 +96,17 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
         <ul>
           {brackets.map((bracket, index) => (
             <li key={index} className="mb-2 border p-2 rounded">
+              <div className="relative">
               <Bracket bracket={bracket} liveBracket={false} />
+              <div className="absolute bottom-2 right-2">
+                <Button
+                  onClick={() => saveBracket(bracket, index + 1)}
+                  className="bg-[var(--primary-color)] font-bold hover:bg-blue-900"
+                >
+                  SAVE BRACKET
+                </Button>
+              </div>
+            </div>
             </li>
           ))}
         </ul>
