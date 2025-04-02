@@ -54,7 +54,6 @@ lint_frontend:
   stage: lint
   image: python:3.9
   before_script:
-    - cd src/frontend-mm_app
     - pip install flake8
   script:
     - set +e
@@ -144,9 +143,9 @@ test_backend:
       command: [ "--default-authentication-plugin=mysql_native_password" ]
   before_script:
     #- pip install -r src/backend/requirements.txt
-    - sleep 10  # Give MySQL time to initialize
     - cd ./src/integration-tests
     - npm install
+    - sleep 15  # Give MySQL time to initialize
   script:
     - npm test
   tags:
