@@ -136,7 +136,7 @@ test_backend:
 
 test_frontend:
   stage: test
-  image: node:latest
+  image: node:22
   before_script:
     - cd ./src/frontend-mm_app
     - npm install 
