@@ -10,7 +10,6 @@ export default function LiveBracketPage() {
 
     // formats the data to make it consistent with our bracket structure
     function formatDataIntoBracketStructure(data : any): any {
-        console.log("DATA", data);
         const roundObjArray: Round[] = []
         data.rounds.forEach((round : any, idx1 : any) => {
         // Skip the First Four
@@ -30,15 +29,15 @@ export default function LiveBracketPage() {
                         const gameNumberB = parseInt(b.title.match(/Game (\d+)/)?.[1]);
                         return gameNumberA - gameNumberB;
                     });
-                    console.log(region.games)
                     region.games.forEach((game : any, idx3: any) => {
+                    console.log("games", game);
                     // grabs team info
-                    const awayTeam : Team = {name: game.away.alias };
-                    const homeTeam : Team = {name: game.home.alias };
+                    const awayTeam : Team = {name: game.away.alias, seed: game.away.seed};
+                    const homeTeam : Team = {name: game.home.alias, seed: game.home.seed };
                     // puts team info into an array
                     const teamArray : Team[] = [homeTeam, awayTeam];
                     // creates info abouth the game
-                    const teamInfo : Seed = {id: game.id, teams: teamArray, date: new Date(game.scheduled).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }), region: region.bracket.name.match(/^(\w+)/)?.[1].toUpperCase() || ""}
+                    const teamInfo : Seed = {id: game.id, teams: teamArray, homeScore: game.home_points, awayScore: game.away_points, date: new Date(game.scheduled).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }), region: region.bracket.name.match(/^(\w+)/)?.[1].toUpperCase() || ""}
                     // pushes all seed info into an array from a selected round
                     seedArray.push(teamInfo)
                     })
@@ -47,12 +46,12 @@ export default function LiveBracketPage() {
             } else { 
                 round.games.forEach((game : any) => {
                     // grabs team info
-                    const awayTeam : Team = {name: game.away.alias };
-                    const homeTeam : Team = {name: game.home.alias };
+                    const awayTeam : Team = {name: game.away.alias, seed: game.away.seed };
+                    const homeTeam : Team = {name: game.home.alias, seed: game.home.seed };
                     // puts team info into an array
                     const teamArray : Team[] = [homeTeam, awayTeam];
                     // creates info abouth the game
-                    const teamInfo : Seed = {id: game.id, teams: teamArray, region: 'FINAL FOUR', date: new Date(game.scheduled).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                    const teamInfo : Seed = {id: game.id, teams: teamArray, region: 'FINAL FOUR', homeScore: game.home_points, awayScore: game.away_points, date: new Date(game.scheduled).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                     // pushes all seed info into an array from a selected round
                     seedArray.push(teamInfo)
                 })
@@ -62,6 +61,7 @@ export default function LiveBracketPage() {
             roundObjArray.push(roundObj);
         }
         })
+        console.log("roundObjArrray", roundObjArray);
         // will need to change id based on which bracket they have created
         const bracketObj: BracketType = {title: data.name , id: 1, rounds: roundObjArray }
         // updated brackets object

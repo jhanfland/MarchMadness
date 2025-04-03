@@ -52,8 +52,8 @@ def generate_bracket_template():
                 "id": game_index + 1,
                 "date": game.get("scheduled", ""),
                 "teams": [
-                    { "name": game.get("home", {}).get("name", "TBD") },
-                    { "name": game.get("away", {}).get("name", "TBD") }
+                    { "name": game.get("home", {}).get("name", "TBD"), "seed": game.get("home", {}).get("seed")},
+                    { "name": game.get("away", {}).get("name", "TBD"), "seed": game.get("away", {}).get("seed")}
                 ]
             }
             region_seeds[region_name].append(seed)
