@@ -114,23 +114,6 @@ build_frontend:
     - dind
   allow_failure: true
 
-release:
-  stage: build
-  image: docker:20.10.16
-  services:
-    - docker:20.10.16-dind
-  script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker-compose -f docker-compose.yml build
-    - docker tag backend:latest $CI_REGISTRY_IMAGE/backend:$RELEASE_TAG
-    - docker tag frontendReact:latest $CI_REGISTRY_IMAGE/frontend:$RELEASE_TAG
-    - docker push $CI_REGISTRY_IMAGE/backend:$RELEASE_TAG
-    - docker push $CI_REGISTRY_IMAGE/frontend:$RELEASE_TAG
-  tags:
-    - dind
-  only:
-    - main
-
 #####################################
 ############## Testing ##############
 #####################################
@@ -142,7 +125,6 @@ test_backend:
       alias: db
       command: [ "--default-authentication-plugin=mysql_native_password" ]
   before_script:
-    #- pip install -r src/backend/requirements.txt
     - cd ./src/integration-tests
     - npm install
     - sleep 15  # Give MySQL time to initialize
@@ -154,7 +136,7 @@ test_backend:
 
 test_frontend:
   stage: test
-  image: node:14
+  image: node:16
   before_script:
     - cd ./src/frontend-mm_app
     - npm install 
