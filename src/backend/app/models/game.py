@@ -1,5 +1,6 @@
 from app import db
 
+
 class Game(db.Model):
     __tablename__ = 'games'
     game_id = db.Column(db.Integer, primary_key=True)

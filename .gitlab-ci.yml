@@ -1,0 +1,147 @@
+#####################################
+############### Setup ###############
+#####################################
+stages:
+  - lint
+  - static_analysis
+  - build
+  - test
+
+variables:
+  RELEASE_TAG: release-$CI_PIPELINE_IID
+  MYSQL_ROOT_PASSWORD: team3
+  MYSQL_DATABASE: march_madness_betting
+  MYSQL_USER: root
+  MYSQL_HOST: db
+  MYSQL_PORT: 3306
+  DATABASE_URL: mysql+pymysql://root:team3@db:3306/march_madness_betting
+
+#####################################
+############## Services #############
+#####################################
+services:
+  - name: docker:20.10.16-dind
+    alias: docker
+
+#####################################
+##### Linting & Static Analysis #####
+#####################################
+lint_backend:
+  stage: lint
+  image: python:3.9
+  before_script:
+    - pip install -r src/backend/requirements.txt
+    - pip install black 
+    - pip install flake8
+    - pip install npm
+  script:
+  #The following are links to linting docs
+  #https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#
+  #https://flake8.pycqa.org/en/latest/user/options.html
+  #Use --ignore=<errors> to ignore certain errors
+    - set +e
+    - black ./src/backend --skip-string-normalization --check --verbose --diff --color > black_linting_backend.txt
+    - flake8 ./src/backend --ignore=F401,E711 --max-line-length=90 --count > flake8_linting_backend.txt 
+  artifacts:
+    paths:
+      - black_linting_backend.txt
+      - flake8_linting_backend.txt 
+  tags:
+    - dind
+  allow_failure: true
+
+lint_frontend:
+  stage: lint
+  image: python:3.9
+  before_script:
+    - pip install flake8
+  script:
+    - set +e
+    - flake8 ./src/frontend-mm_app --ignore=E302,E722  --max-line-length=90 --count > flake8_linting_frontend.txt 
+  artifacts:
+    paths:
+      - flake8_linting_frontend.txt 
+  tags:
+    - dind
+  allow_failure: true
+
+#####################################
+######### Static Analysis ###########
+#####################################
+static_analysis_backend:
+  stage: static_analysis
+  image: python:3.9
+  before_script:
+    - pip install -r src/backend/requirements.txt
+    - pip install mypy
+  script:
+    #The following is a link to static analysis docs
+    #https://mypy.readthedocs.io/en/latest/command_line.html
+    - mypy src/backend
+  tags:
+    - dind
+  allow_failure: true
+
+#####################################
+############## Build ################
+#####################################
+
+build_backend:
+  stage: build
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  script:
+    - docker build -t backend:latest ./src/backend
+  artifacts:
+    paths:
+      - src/backend
+  tags:
+    - dind
+  allow_failure: true
+
+build_frontend:
+  stage: build
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  script:
+    - docker build -t frontend-mm_app:latest ./src/frontend-mm_app
+  artifacts:
+    paths:
+      - src/frontend-mm_app/dist
+  tags:
+    - dind
+  allow_failure: true
+
+#####################################
+############## Testing ##############
+#####################################
+test_backend:
+  stage: test
+  image: node:latest
+  services:
+    - name: mysql:latest
+      alias: db
+      command: [ "--default-authentication-plugin=mysql_native_password" ]
+  before_script:
+    #- sleep 10  # Give MySQL time to initialize
+    - cd ./src/integration-tests
+    - npm install
+  script:
+    - npm test
+  tags:
+    - dind
+  allow_failure: true
+
+test_frontend:
+  stage: test
+  image: node:latest
+  before_script:
+    - cd ./src/frontend-mm_app
+    - npm install 
+  script:
+    - npm test 
+  tags:
+    - dind
+  allow_failure: true
