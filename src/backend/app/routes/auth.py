@@ -28,7 +28,10 @@ def register():
 
     # Stores user ID
     session['id'] = new_user.id
-    return jsonify({"message": "User registered", "user": data, 'token': new_user.id }), 201
+    return (
+        jsonify({"message": "User registered", "user": data, 'token': new_user.id}),
+        201,
+    )
 
 
 # Route for user login

@@ -1,3 +1,4 @@
+# mypy: disable-error-code="import-not-found"
 from flask import Blueprint, jsonify, abort
 
 main_bp = Blueprint('main', __name__)

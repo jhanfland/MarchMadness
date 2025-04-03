@@ -1,4 +1,5 @@
 # mypy: disable-error-code="import-untyped"
+# mypy: disable-error-code="import-not-found"
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -29,11 +30,12 @@ def create_app():
     from app.routes.auth import auth_bp
     from app.routes.main import main_bp
     from app.routes.bracket import bracket_bp
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(bracket_bp)
-    
-     # Register error handlers
+
+    # Register error handlers
     from app.error_handlers import register_error_handlers
 
     register_error_handlers(app)
