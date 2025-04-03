@@ -135,7 +135,6 @@ test_backend:
     - dind
   allow_failure: true
 
-
 test_frontend:
   stage: test
   image: node:latest
