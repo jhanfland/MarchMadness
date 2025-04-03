@@ -1,5 +1,4 @@
-# mypy: disable-error-code="import-untyped"
-# mypy: disable-error-code="import-not-found"
+# mypy: disable-error-code="import-untyped,import-not-found"
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS

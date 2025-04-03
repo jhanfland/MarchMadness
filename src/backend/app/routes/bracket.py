@@ -1,3 +1,4 @@
+# mypy: disable-error-code="import-untyped,import-not-found"
 from flask import Blueprint, request, jsonify, session
 from app import db, api_key, mm_tournament_id, prev_mm_tournament_id
 from app.models.bracket import Bracket

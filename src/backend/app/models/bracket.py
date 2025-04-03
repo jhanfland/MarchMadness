@@ -1,3 +1,4 @@
+# mypy: disable-error-code="name-defined,import-untyped,import-not-found"
 from app import db
 
 
