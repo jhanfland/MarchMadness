@@ -128,7 +128,7 @@ test_backend:
   before_script:
     - sleep 10  # Give MySQL time to initialize
     - cd ./src/integration-tests
-    - sudo apt-get install -y nodejs npm
+    - apt-get install -y nodejs npm
     - npm install
     - docker build -t backend:latest ./src/backend
   script:
