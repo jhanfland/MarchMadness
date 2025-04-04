@@ -119,7 +119,7 @@ build_frontend:
 #####################################
 test_backend:
   stage: test
-  image: node:20
+  image: docker:20.10.16
   services:
     - docker:20.10.16-dind
     - name: mysql:latest
@@ -128,6 +128,7 @@ test_backend:
   before_script:
     - sleep 10  # Give MySQL time to initialize
     - cd ./src/integration-tests
+    - sudo apt-get install -y nodejs npm
     - npm install
     - docker build -t backend:latest ./src/backend
   script:
