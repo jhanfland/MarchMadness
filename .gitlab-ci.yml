@@ -130,7 +130,7 @@ test_backend:
     - cd ./src/integration-tests
     - apk add --no-cache nodejs npm
     - npm install
-    - docker build -t backend:latest ./src/backend
+    - docker build -t backend:latest ./../backend
   script:
     - npm test -- --runInBand
   tags:
