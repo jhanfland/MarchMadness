@@ -119,8 +119,9 @@ build_frontend:
 #####################################
 test_backend:
   stage: test
-  image: docker:20.10.16
+  image: node:20
   services:
+    - docker:20.10.16-dind
     - name: mysql:latest
       alias: db
       command: [ "--default-authentication-plugin=mysql_native_password" ]
