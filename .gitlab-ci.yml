@@ -119,7 +119,7 @@ build_frontend:
 #####################################
 test_backend:
   stage: test
-  image: node:22
+  image: node:20
   services:
     - name: mysql:latest
       alias: db
@@ -129,7 +129,7 @@ test_backend:
     - cd ./src/integration-tests
     - npm install
   script:
-    - npm run test
+    - npm test
   tags:
     - dind
   allow_failure: true
