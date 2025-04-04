@@ -127,9 +127,10 @@ test_backend:
   before_script:
     - apt-get update -y
     - apt-get install -y python3 python3-pip
+    - cd ./src/backend
     - pip install -r requirements.txt
     - sleep 10  # Give MySQL time to initialize
-    - cd ./src/integration-tests
+    - cd ./../../src/integration-tests
     - npm ci
   script:
     - npm test
