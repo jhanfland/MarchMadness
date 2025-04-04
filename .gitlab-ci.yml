@@ -129,7 +129,7 @@ test_backend:
     - cd ./src/integration-tests
     - npm install
   script:
-    - npm test
+    - npm test -- --runInBand
   tags:
     - dind
   allow_failure: true
