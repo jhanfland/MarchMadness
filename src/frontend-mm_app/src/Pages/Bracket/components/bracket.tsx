@@ -72,9 +72,6 @@ const CustomSeed = ({
     const value1 = `${team1seed}_${team1}-${seed.id}-0`;
     const value2 = `${team2seed}_${team2}-${seed.id}-1`;
 
-    console.log("val1", value1);
-    console.log("val2", value2);
-
     function updateSelection(teamSeedPlace: string) {
       setSelection((prev) => ({ ...prev, [key]: teamSeedPlace }));
     }
@@ -238,8 +235,6 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
   
     setFinalFourRounds(updatedFinalFour);
   }, [selectedTeams]);
-  
-  
 
   /*function genSeeds(numberOfTeams: number): SeedType[] {
     const seeds = Array.from({ length: numberOfTeams }, (_, index) => ({
@@ -282,6 +277,72 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
         )}
     </>
     );
+  }
+
+  
+
+  console.log("selected Teams", selectedTeams, "parsed data", parseSelectedTeamData(selectedTeams));
+  // 
+  /**
+   * We need to move this function to BracketPage but will work on that later when working with Norris
+   * This method should parse the data properly in this format, for easy db retrieval, and score comparison
+   * Format of JSON
+   * 0-1-EAST: "8_Mississippi State Bulldogs-2-0" --> (Round(horizontal))-(Index(vertical))-(REGION):(Seed)_(Team Name)-(Index(vertical) + 1)-(teamIndex from matchup -- either 0 or 1)
+   * @param data 
+   * @returns 
+   */
+  function parseSelectedTeamData (data: any) {
+    // means full bracket
+    if (Object.keys(selectedTeams).length != 63) {
+      // May want to disable the save button until they are allowed to do all 63 teams picked
+      return undefined;
+    }
+
+    // want bracket format to look like this after manipulating data, fill seeds with team name, team seed, and team selected by user for each matchup of each round
+    return {
+      id: bracket.id,
+      title: bracket.title,
+      regions: {
+        EAST: {
+          rounds: [
+            {title: 'First Round', seeds: []},
+            {title: 'Second Round', seeds: []},
+            {title: 'Sweet 16', seeds: []},
+            {title: 'Elite 8', seeds: []}
+          ]
+        },
+        MIDWEST: {
+          rounds: [
+            {title: 'First Round', seeds: []},
+            {title: 'Second Round', seeds: []},
+            {title: 'Sweet 16', seeds: []},
+            {title: 'Elite 8', seeds: []}
+          ]
+        }, 
+        SOUTH: {
+          rounds: [
+            {title: 'First Round', seeds: []},
+            {title: 'Second Round', seeds: []},
+            {title: 'Sweet 16', seeds: []},
+            {title: 'Elite 8', seeds: []}
+          ]
+        },
+        WEST: {
+          rounds: [
+            {title: 'First Round', seeds: []},
+            {title: 'Second Round', seeds: []},
+            {title: 'Sweet 16', seeds: []},
+            {title: 'Elite 8', seeds: []}
+          ]
+        },
+        FINAL_FOUR: {
+          rounds: [
+            {title: 'Final Four', seeds: []},
+            {title: 'National Championship', seeds: []},
+          ]
+        }
+      }
+    }
   }
 
   return (
