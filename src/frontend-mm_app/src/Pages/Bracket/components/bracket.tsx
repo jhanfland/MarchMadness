@@ -286,6 +286,8 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
   /**
    * We need to move this function to BracketPage but will work on that later when working with Norris
    * This method should parse the data properly in this format, for easy db retrieval, and score comparison
+   * Format of JSON
+   * 0-1-EAST: "8_Mississippi State Bulldogs-2-0" --> (Round(horizontal))-(Index(vertical))-(REGION):(Seed)_(Team Name)-(Index(vertical) + 1)-(teamIndex from matchup -- either 0 or 1)
    * @param data 
    * @returns 
    */
