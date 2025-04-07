@@ -1,4 +1,4 @@
-import dunkingImg from "/basketball.jpg";
+import Slider from "@/components/ui/Hero-Slider";
 import { Link } from "react-router-dom";
 
 export default function Homepage() {
@@ -37,11 +37,7 @@ export default function Homepage() {
             </Link>
           </div>
 
-          <img
-            src={dunkingImg}
-            width="800px"
-            alt="Dunking Basketball"
-          />
+          <Slider className="relative top-0 left-0 w-[800px] "/>
         </div>
       </div>
     </div>
