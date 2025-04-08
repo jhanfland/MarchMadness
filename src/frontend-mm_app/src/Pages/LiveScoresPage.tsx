@@ -2,6 +2,7 @@ import ButtonBar from "@/components/ui/buttonbar";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import grab_live_bracket_info from "./Bracket/LiveBracketPage";
+import logo from "./../images/logo.png";
 
 export function LiveScoresPage() {
         
@@ -9,58 +10,75 @@ export function LiveScoresPage() {
     useEffect(() => {march_maddness_data}, []);
     console.log(march_maddness_data)
 
-
-
     return (
         <div>
             <ButtonBar>
                 <Button className="live-scores-button">
-                    <p className="whitespace-pre-line">
-                        Round of 64
-
-                    </p>
-                    <hr></hr>
-                    <p className="text-xs">                        
-                        Mar 20 - 21
-                    </p>
-                    
+                    <div>
+                        <p className="whitespace-pre-line">
+                            Round of 64
+                        </p>
+                        <p className="text-xs text-neutral-400">                        
+                            Mar 20 - 21
+                        </p>
+                    </div>
                 </Button>
                     
                 <Button className="live-scores-button"> 
-                    Round of 32
-                    <h1>
-                        Mar 22 - 23
-                    </h1>
+                    <div>
+                        <p className="whitespace-pre-line">
+                            Round of 32
+                        </p>
+                        <p className="text-xs text-neutral-400">
+                            Mar 22 - 23
+                        </p>
+                    </div>
                 </Button>
 
                 <Button className="live-scores-button">
-                    Sweet 16
-                    <h1>
-                        Mar 27 - 28
-                    </h1>
-
+                    <div>
+                        <p className="whitespace-pre-line">
+                            Sweet 16
+                        </p>
+                        <p className="text-xs text-neutral-400">
+                            Mar 27 - 28
+                        </p>
+                    </div>
                 </Button>
 
                 <Button className="live-scores-button">
-                    Elite 8
-                    <h1>
-                        Mar 29 - 30 
-                    </h1>
+                    <div>
+                        <p className="whitespace-pre-line">
+                            Elite 8
+                        </p>
+                        <p className="text-xs text-neutral-400">
+                            Mar 29 - 30 
+                        </p>
+                    </div>
                 </Button>
 
                 <Button className="live-scores-button">
-                    Final 4
-                    <h1>
-                        Apr 5
-                    </h1>
+                    <div>
+                        <p className="whitespace-pre-line">
+                            Final 4
+                        </p>
+                        <p className="text-xs text-neutral-400">
+                            Apr 5
+                        </p>
+                    </div>
                 </Button>
 
                 <Button className="live-scores-button">
-                    Final
-                    <h1>
-                        Apr 7
-                    </h1>
+                    <div>
+                        <p className="whitespace-pre-line">
+                            Final
+                        </p>
+                        <p className="text-xs text-neutral-400">
+                            Apr 7
+                        </p>
+                    </div>
                 </Button>
+
             </ButtonBar>
         </div>
     );
