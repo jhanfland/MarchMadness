@@ -1,0 +1,49 @@
+.slider {
+    overflow: hidden;
+    flex: 1;
+    z-index: 0;
+
+}
+
+/* Static gradient mask */
+.slider::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.slider > img {
+    object-fit: cover;
+    object-position: 50% 20%;
+    position: absolute;
+    opacity: 0;
+    z-index: 1;
+    /* Transition for both transform and opacity */
+    transition: transform 8s, opacity 1s;
+}
+
+/* Active images are shown and scaled up */
+.slider > img.active {
+    opacity: 1;
+    z-index: 2;
+    transform: scale(1.2);
+}
+
+/* The "initial" class forces the starting scale to be 1.
+   When removed, the image transitions to scale(1.2) as defined in .active */
+.slider > img.initial {
+    transform: scale(1);
+    /* Optionally, disable transition here to ensure a clean start */
+    transition: none;
+}
+
+#slider-img2 {
+    object-position: 50% 60%;
+}
+
+#slider-img3 {
+    object-position: 50% 50%;
+}
+
