@@ -63,7 +63,7 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
     }
   };
 
-  const saveBracket = async (bracket: BracketType, bracketNumber: number) => {
+  const saveBracket = async (bracket: BracketType, bracket_number: number) => {
     const token = localStorage.getItem("token");
 
     try {
@@ -74,16 +74,34 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          bracket_number: bracketNumber,
+          bracket_number,
           bracket_selection: bracket,
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to save bracket");
-      const data = await response.json();
-      console.log("Bracket saved successfully:", data);
-    } catch (err) {
-      console.error("Error saving bracket:", err);
+      const data = await response.json(); 
+
+      if (!response.ok) {
+        const fetchUpdated = await fetch(`${BACKEND_URL}/get_user_bracket/${bracket_number}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const updated = await fetchUpdated.json();
+        if (updated.bracket) {
+          setBrackets(prev =>
+            prev.map((b, i) =>
+              i === bracket_number - 1 ? updated.bracket : b
+            )
+          );
+        }
+        alert("Bracket saved successfully!");
+      } else {
+        alert("Failed to save bracket.");
+        console.log("Response status:", response.status);
+        console.log("Response body:", data); 
+      }
+    } catch (error) {
+      console.error("Error saving bracket:", error);
+      setError("Failed to save bracket.");
     }
   };
 
