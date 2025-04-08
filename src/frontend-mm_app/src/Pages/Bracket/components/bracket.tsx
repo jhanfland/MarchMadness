@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import {
   Bracket as BracketType,
   Region,
@@ -109,7 +109,7 @@ const CustomSeed = ({
   }
 };
 
-export default function Bracket({ bracket, liveBracket }: BracketProps) {
+const Bracket = forwardRef(function Bracket({ bracket, liveBracket }: BracketProps, ref) {
   const [selectedRegion, setSelectedRegion] = useState<Region>("EAST");
 
   const [selectedTeams, setSelectedTeams] = useState<Record<string, string>>({});
@@ -282,6 +282,12 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
   
 
   console.log("selected Teams", selectedTeams, "parsed data", parseSelectedTeamData(selectedTeams));
+  /**
+   * This is how we propogate it up to save button
+   */
+  useImperativeHandle(ref, () => ({
+    getParsedBracketData: () => parseSelectedTeamData(selectedTeams),
+  }));
   // 
   /**
    * We need to move this function to BracketPage but will work on that later when working with Norris
@@ -368,4 +374,6 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
       )}
     </div>
   );
-}
+})
+
+export default Bracket;
