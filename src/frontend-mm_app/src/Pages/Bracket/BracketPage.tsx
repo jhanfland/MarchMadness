@@ -51,7 +51,7 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
       setBrackets((prev) => [
         ...prev,
         {
-          id: data.id,
+          id: 1, // want to correspond to the next user bracket, may want to have a backend route to return the number of brackets the user has created
           title: data.title,
           regions: data.regions as Record<string, Seed[]>,
         },
@@ -105,6 +105,7 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
     }
   };
 
+  console.log("brackets structure set by Stephen", brackets);
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Brackets</h1>
