@@ -8,12 +8,47 @@
   --primary-text: white;
   --background: #121619;
   --primary-color: #2C5AB7;
+  --live-scores-button-color: #2e3239;
+  --sub-text: #1a1b1e;
 
   color-scheme: light dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/*CSS for Live Scores Page Button Bar*/
+.button-group {
+  margin: auto;
+  text-align: center;
+  width: 65%;
+  background-color: var(--live-scores-button-color);
+  color: white; 
+  padding: 6px 20px;
+  cursor: pointer; 
+  border-radius: 10px;
+}
+
+.live-scores-button {
+  padding-left: -10px;
+  background-color: var(--live-scores-button-color);
+  box-shadow: none;
+}
+
+.button-group button:hover {
+  background-color: var(--primary-color);
+}
+
+.score-box {
+  margin: auto;
+  text-align: center;
+  width: 50%;
+  background-color: var(--live-scores-button-color);
+  color: white; 
+  padding: 10px 24px;
+  cursor: pointer; 
+  border-radius: 5px;
 }
 
 .primary-text-color {
