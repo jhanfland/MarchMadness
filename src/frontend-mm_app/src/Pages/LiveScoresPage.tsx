@@ -8,76 +8,35 @@ export function LiveScoresPage() {
         
     var march_maddness_data = grab_live_bracket_info();
     useEffect(() => {march_maddness_data}, []);
-    console.log(march_maddness_data)
+    console.log(march_maddness_data.toDateString)
+
+    const umm = async () => {
+        
+
+    }
+
+    const buttons = [{name: "Round of 64", date:"Mar 20 - 21"},
+                     {name: "Round of 32", date: "Mar 22 - 23"},
+                     {name: "Sweet 16", date: "Mar 27 - 28"},
+                     {name: "Elite 8", date: "Mar 29 - 30"},
+                     {name: "Final 4", date: "Apr 5"},
+                     {name: "Final", date: "Apr 7"}]
 
     return (
         <div>
             <ButtonBar>
-                <Button className="live-scores-button">
+                { buttons.map((buttonIndex) =>  
+                <Button button={buttonIndex} className="live-scores-button">
                     <div>
                         <p className="whitespace-pre-line">
-                            Round of 64
+                            {buttonIndex.name}
                         </p>
                         <p className="text-xs text-neutral-400">                        
-                            Mar 20 - 21
+                            {buttonIndex.date}
                         </p>
                     </div>
                 </Button>
-                    
-                <Button className="live-scores-button"> 
-                    <div>
-                        <p className="whitespace-pre-line">
-                            Round of 32
-                        </p>
-                        <p className="text-xs text-neutral-400">
-                            Mar 22 - 23
-                        </p>
-                    </div>
-                </Button>
-
-                <Button className="live-scores-button">
-                    <div>
-                        <p className="whitespace-pre-line">
-                            Sweet 16
-                        </p>
-                        <p className="text-xs text-neutral-400">
-                            Mar 27 - 28
-                        </p>
-                    </div>
-                </Button>
-
-                <Button className="live-scores-button">
-                    <div>
-                        <p className="whitespace-pre-line">
-                            Elite 8
-                        </p>
-                        <p className="text-xs text-neutral-400">
-                            Mar 29 - 30 
-                        </p>
-                    </div>
-                </Button>
-
-                <Button className="live-scores-button">
-                    <div>
-                        <p className="whitespace-pre-line">
-                            Final 4
-                        </p>
-                        <p className="text-xs text-neutral-400">
-                            Apr 5
-                        </p>
-                    </div>
-                </Button>
-
-                <Button className="live-scores-button">
-                    <div>
-                        <p className="whitespace-pre-line">
-                            Final
-                        </p>
-                        <p className="text-xs text-neutral-400">
-                            Apr 7
-                        </p>
-                    </div>
-                </Button>
+            ) }
 
             </ButtonBar>
         </div>
