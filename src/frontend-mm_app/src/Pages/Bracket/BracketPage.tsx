@@ -1,6 +1,6 @@
 import Bracket from "@/Pages/Bracket/components/bracket";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Bracket as BracketType,
   Seed,
@@ -15,6 +15,7 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
   const [error, setError] = useState<string | null>(null);
 
   const token = localStorage.getItem("token");
+  const bracketRef = useRef<any>(null);
 
   useEffect(() => {
     if (!token) {
@@ -43,15 +44,27 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
           },
         }
       );
+
+      const bracket_number = await fetch(
+        `${BACKEND_URL}/get_user_bracket_id`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       /* needs 200 response (.ok is boolean for 200) */
       if (!API.ok) throw new Error("Failed to get bracket");
+      if (!bracket_number.ok) throw new Error("Failed to collect bracket id/number");
       /* saves data to react */
       const data = await API.json();
+      const bracket_num_data = await bracket_number.json();
       /* update list of brackets and create bracket */
       setBrackets((prev) => [
         ...prev,
         {
-          id: 1, // want to correspond to the next user bracket, may want to have a backend route to return the number of brackets the user has created
+          id: bracket_num_data.next_bracket_number,
           title: data.title,
           regions: data.regions as Record<string, Seed[]>,
         },
@@ -60,6 +73,38 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
     } catch (err) {
       console.error("Error with creating bracket:", err);
       setError("Failed to generate bracket.");
+    }
+  };
+
+  const saveBracket = async (bracket_number: number) => {
+    const token = localStorage.getItem("token");
+
+    // grabs parsed bracker
+    const bracket = bracketRef.current?.getParsedBracketData();
+    console.log("parsedBracketData", bracket);
+    if (!bracket) {
+      alert("Please finish all 63 picks before saving!")
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/create_user_bracket`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          bracket_number,
+          bracket_selection: bracket,
+        }),
+      });
+
+      const data = await response.json(); 
+      // TODO
+    } catch (error) {
+      console.error("Error saving bracket:", error);
+      setError("Failed to save bracket.");
     }
   };
 
@@ -73,7 +118,17 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
         <ul>
           {brackets.map((bracket, index) => (
             <li key={index} className="mb-2 border p-2 rounded">
-              <Bracket bracket={bracket} liveBracket={false} />
+              <div className="relative">
+                <Bracket ref={bracketRef} bracket={bracket} liveBracket={false} />
+                <div className="absolute bottom-2 right-2">
+                  <Button
+                    onClick={() => saveBracket(bracket.id)}
+                    className="bg-[var(--primary-color)] font-bold hover:bg-blue-900"
+                  >
+                    SAVE BRACKET
+                  </Button>
+                </div>
+              </div>
             </li>
           ))}
         </ul>

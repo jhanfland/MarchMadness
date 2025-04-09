@@ -5,6 +5,7 @@ from app.models.user import User
 import datetime
 import requests
 from flask import current_app as app
+from sqlalchemy import func
 
 bracket_bp = Blueprint('bracket', __name__)
 
@@ -67,7 +68,17 @@ def generate_bracket_template():
 
     return jsonify(bracket), 200
 
-
+@bracket_bp.route('/get_user_bracket_id', methods=['GET'])
+def get_bracket_id():
+    user, mes, errNum = verify_user()
+    if (user == None):
+        return mes, errNum
+    max_bracket = db.session.query(func.max(Bracket.bracket_number))\
+                            .filter_by(id=user.id)\
+                            .scalar()
+    # If user has no brackets, start from 1
+    next_bracket_number = (max_bracket or 0) + 1
+    return jsonify({'next_bracket_number': next_bracket_number})
 
 # Returns users bracket that has already been created
 @bracket_bp.route('/get_user_bracket/<int:bracket_number>', methods=['GET'])
