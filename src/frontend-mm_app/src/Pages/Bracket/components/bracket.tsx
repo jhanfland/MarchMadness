@@ -73,7 +73,46 @@ const CustomSeed = ({
     const value2 = `${team2seed}_${team2}-${seed.id}-1`;
 
     function updateSelection(teamSeedPlace: string) {
-      setSelection((prev) => ({ ...prev, [key]: teamSeedPlace }));
+      const [, selectedTeamName] = teamSeedPlace.split("-")[0].split("_");
+    
+      setSelection((prev) => {
+        // parse the current round and region from the key
+        const [roundNum, , region] = key.split("-");
+        const currentRound = parseInt(roundNum);
+    
+        const removedTeam = prev[key]?.split("-")[0].split("_")[1];    
+        // build the updated bracket
+        const updateBracket = {} as Record<string, string>;
+    
+        // k=key, v=value -> loop through all previous selections
+        for (const [k, v] of Object.entries(prev)) {
+          const [reigonNum, , reigonReg] = k.split("-");
+          const round = parseInt(reigonNum);
+    
+          // determine if this selection is...
+          const isSameRegion = reigonReg === region;
+          const isLaterRound = round > currentRound;
+          const hasRemovedTeam = removedTeam && v.includes(removedTeam);
+    
+          // keep pick if doesn't involve removed team
+          if (!isSameRegion || !isLaterRound || !hasRemovedTeam) {
+            updateBracket[k] = v;
+          }
+        }
+    
+        updateBracket[key] = teamSeedPlace;
+    
+        // remove removedTeam from Final Four + Championship
+        if (["EAST", "WEST", "SOUTH", "MIDWEST"].includes(region) && removedTeam) {
+          for (const k of Object.keys(updateBracket)) {
+            if ((k.includes("FINAL FOUR") || k.includes("CHAMPIONSHIP")) && updateBracket[k].includes(removedTeam)) {
+              delete updateBracket[k];
+            }
+          }
+        }
+    
+        return updateBracket;
+      });
     }
 
     return (
