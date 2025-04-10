@@ -3,6 +3,7 @@ from app import db
 from app.models.user import User
 import jwt
 import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app as app
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -12,13 +13,18 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 def register():
 
     data = request.get_json()
-    new_user = User(email=data['email'], password=data['password'], balance=data.get('balance', 0))
-    
+
     # Handle existing email edge case
     existing_user = User.query.filter_by(email=data['email']).first()
     if existing_user:
         return jsonify({"error": "Email already exists"}), 400
-    
+
+    # hash passwork before creating new user
+    hashed_password = generate_password_hash(data['password'])
+
+    # new user now with hashed password
+    new_user = User(email=data['email'], password=hashed_password, balance=data.get('balance', 0))
+
     # Add new user to database
     db.session.add(new_user)
     db.session.commit()
@@ -35,7 +41,8 @@ def login():
     password = data.get('password')
 
     user = User.query.filter_by(email=email).first()    # Find user email in database
-    if not user or user.password != password:  # Direct password comparison (Maybe hash password later)
+
+    if not user or not check_password_hash(user.password, password):  # Direct password comparison (now hashed)
         return jsonify({'error': 'Invalid email or password.'}), 401
 
     # Store user ID in session for auth
