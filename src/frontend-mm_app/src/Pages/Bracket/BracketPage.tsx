@@ -13,7 +13,7 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
   const [brackets, setBrackets] = useState<BracketType[]>(initialBrackets);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [score, setScore] = useState<number | null>(null);
   const token = localStorage.getItem("token");
   const bracketRef = useRef<any>(null);
 
@@ -101,13 +101,27 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
       });
 
       const data = await response.json(); 
-      // TODO
+      const scoreResponse = await fetch(`${BACKEND_URL}/score_bracket`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          // Pass the saved user bracket id
+          user_bracket_id: bracket_number,
+        }),
+      });
+      
+      if (!scoreResponse.ok) throw new Error("Scoring failed");
+      const scoreData = await scoreResponse.json();
+      setScore(scoreData.score); // update the score state with returned score
     } catch (error) {
       console.error("Error saving bracket:", error);
       setError("Failed to save bracket.");
     }
   };
-
+  
   console.log("brackets structure set by Stephen", brackets);
   return (
     <div className="p-4">
@@ -115,27 +129,34 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
       {loading && <p>Loading brackets...</p>}
       {error && <p className="text-red-500">Error: {error}</p>}
       {!loading && !error && brackets.length > 0 ? (
-        <ul>
-          {brackets.map((bracket, index) => (
-            <li key={index} className="mb-2 border p-2 rounded">
-              <div className="relative">
-                <Bracket ref={bracketRef} bracket={bracket} liveBracket={false} />
-                <div className="absolute bottom-2 right-2">
-                  <Button
-                    onClick={() => saveBracket(bracket.id)}
-                    className="bg-[var(--primary-color)] font-bold hover:bg-blue-900"
-                  >
-                    SAVE BRACKET
-                  </Button>
+        <>
+          <ul>
+            {brackets.map((bracket, index) => (
+              <li key={index} className="mb-2 border p-2 rounded">
+                <div className="relative">
+                  <Bracket ref={bracketRef} bracket={bracket} liveBracket={false} />
+                  <div className="absolute bottom-2 right-2">
+                    <Button
+                      onClick={() => saveBracket(bracket.id)}
+                      className="bg-[var(--primary-color)] font-bold hover:bg-blue-900"
+                    >
+                      SAVE BRACKET
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+          {score !== null && (
+            <p className="text-xl font-bold mt-4">
+              Score: {score}
+            </p>
+          )}
+        </>
       ) : (
         !loading && !error && <p>No brackets found.</p>
       )}
-
+  
       {token ? (
         <Button
           onClick={() => createBracket()}
@@ -148,4 +169,5 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
       )}
     </div>
   );
+  
 }
