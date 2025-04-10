@@ -64,3 +64,7 @@ Ideally, our plan for next week is to have a functioning bracket that has all th
 Over the past two weeks (including spring break), our group successfully implemented the user team selection functionality and the logic to auto-populate the later rounds with previously selected winners. This basically completed the bulk of our march madness website features. We also added a "live bracket" page, giving users a dynamic view of the ongoing March Madness bracket. With these two major components complete, we’ve successfully met our Sprint 2 objectives and remain well on track to hit our end-of-year goals. 
 
 Our plans for the upcoming weeks are to continue developing some missing features. These include adding respective information to teams (seeding, game start, etc), developing a save bracket option, incorporating a user scoring system, minor UI updates, among others. 
+## Sprint 3, Week 1 (April 2 - April 9) - Progress Report
+This week our group added a save bracket feature that adds the user bracket to the bracket table in our database. This has put us in a succesful spot as far as finishing our bracket scoring and functionality. Additionally, we added new UI changes to improve the look of our homepage.
+
+Our plan for next week is to finish everything related to the brackets for good. Outside of this we can begin focusing on improving our CI/CD pipeline, deploying our production containers, and finally adding any optional features that our group agrees on.
