@@ -21,37 +21,93 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
   useEffect(() => {
     async function fetchBrackets() {
       if (!token) {
-        setError("Please log in to see or create brackets");
+        setError("Login required.");
         setLoading(false);
         return;
       }
-
+  
       try {
+        // Get saved bracket numbers
         const res = await fetch(`${BACKEND_URL}/get_user_bracket_numbers`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         const { bracket_numbers } = await res.json();
-
-        const bracketsData = await Promise.all(
+  
+        // Get full saved brackets
+        const savedBrackets = await Promise.all(
           bracket_numbers.map(async (num) => {
-            const bracketRes = await fetch(`${BACKEND_URL}/get_user_bracket/${num}`, {
+            const res = await fetch(`${BACKEND_URL}/get_user_bracket/${num}`, {
               headers: { Authorization: `Bearer ${token}` },
             });
-            const bracketJson = await bracketRes.json();
-            return bracketJson.bracket;
+            const data = await res.json();
+            return data.bracket;
           })
         );
-
-        setBrackets(bracketsData);
+  
+        // Get original Round of 64 seeds from template
+        const templateRes = await fetch(`${BACKEND_URL}/generate_bracket_template`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const template = await templateRes.json();
+  
+        const selectionMap: Record<number, Record<string, string>> = {};
+        const formatted: BracketType[] = savedBrackets.map((saved) => {
+          const selected = extractSelectedTeamsFromBracket(saved);
+          selectionMap[saved.id] = selected;
+  
+          // ✅ Restore Round of 64
+          for (const region of ["EAST", "WEST", "SOUTH", "MIDWEST"]) {
+            const seeds = template.regions[region];
+            if (seeds?.length > 0) {
+              saved.regions[region].rounds[0].seeds = seeds;
+            }
+          }
+  
+          // ✅ Restore Final Four round structure
+          const getTeam = (key: string) => {
+            const val = selected[key];
+            if (!val) return { name: "TBD" };
+            const [seed, name] = val.split("-")[0].split("_");
+            return { name, seed };
+          };
+  
+          saved.regions["FINAL_FOUR"] = {
+            rounds: [
+              {
+                title: "Final Four",
+                seeds: [
+                  { id: 1, teams: [getTeam("3-0-EAST"), getTeam("3-0-MIDWEST")] },
+                  { id: 2, teams: [getTeam("3-0-SOUTH"), getTeam("3-0-WEST")] },
+                ],
+              },
+              {
+                title: "National Championship",
+                seeds: [
+                  { id: 1, teams: [getTeam("0-0-FINAL FOUR"), getTeam("0-1-FINAL FOUR")] },
+                ],
+              },
+              {
+                title: "Champion",
+                seeds: [
+                  { id: 1, teams: [getTeam("1-0-FINAL FOUR"), { name: "TBD" }] },
+                ],
+              },
+            ],
+          };
+  
+          return saved;
+        });
+  
+        setBrackets(formatted);
+        setSelectedTeamsMap(selectionMap);
       } catch (err) {
-        console.error("Error fetching saved brackets:", err);
-        setError("Could not load saved brackets.");
+        console.error("Bracket load error:", err);
+        setError("Could not load brackets.");
       } finally {
         setLoading(false);
       }
     }
-
+  
     fetchBrackets();
   }, [token]);
     // TODO: will need to add fetch bracket logic when we can save brackets
@@ -114,6 +170,7 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
         rounds: [
           { title: "Final Four", seeds: [] },
           { title: "National Championship", seeds: [] },
+          { title: "Champion", seeds: [] },
         ]
       };
     
@@ -150,6 +207,23 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
         regions,
       };
     }
+
+    const extractSelectedTeamsFromBracket = (bracket: BracketType): Record<string, string> => {
+      const selected: Record<string, string> = {};
+      for (const [region, regionObj] of Object.entries(bracket.regions)) {
+        regionObj.rounds?.forEach((round, roundIndex) => {
+          round.seeds?.forEach((seed, seedIndex) => {
+            seed.teams?.forEach((team, teamIndex) => {
+              if (!team?.name || team.name === "TBD" || !team.seed) return;
+              const key = `${roundIndex}-${seedIndex}-${region}`;
+              const value = `${team.seed}_${team.name}-${seed.id}-${teamIndex}`;
+              selected[key] = value;
+            });
+          });
+        });
+      }
+      return selected;
+    };
 
   const createBracket = async () => {
     try {
@@ -244,6 +318,7 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
                 <Bracket
                   bracket={bracket}
                   liveBracket={false}
+                  initialSelection={selectedTeamsMap[bracket.id] || {}}
                   onChange={(newMap) =>
                     setSelectedTeamsMap((prev) => ({ ...prev, [bracket.id]: newMap }))
                   }

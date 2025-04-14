@@ -16,10 +16,11 @@ interface BracketProps {
   bracket: BracketType;
   liveBracket: Boolean;
   onChange?: (selected: Record<string, string>) => void;
+  initialSelection?: Record<string, string>; 
 }
 
-const Bracket = forwardRef(function Bracket({ bracket, liveBracket, onChange }: BracketProps, ref) {
-  const [selectedTeams, setSelectedTeams] = useState<Record<string, string>>({});
+const Bracket = forwardRef(function Bracket({ bracket, liveBracket, onChange, initialSelection }: BracketProps, ref) {
+  const [selectedTeams, setSelectedTeams] = useState<Record<string, string>>(initialSelection || {});
   const [selectedRegion, setSelectedRegion] = useState<Region>("EAST");
   const [rounds, setRounds] = useState<Round[]>([]);
   const [finalFourRounds, setFinalFourRounds] = useState<Round[]>([
@@ -41,6 +42,12 @@ const Bracket = forwardRef(function Bracket({ bracket, liveBracket, onChange }: 
   useEffect(() => {
     if (onChange) onChange(selectedTeams);
   }, [selectedTeams]);
+
+  useEffect(() => {
+    if (initialSelection && Object.keys(initialSelection).length > 0) {
+      setSelectedTeams(initialSelection);
+    }
+  }, [initialSelection]);
 
   useEffect(() => {
     if (selectedRegion === "FINAL FOUR") return;
