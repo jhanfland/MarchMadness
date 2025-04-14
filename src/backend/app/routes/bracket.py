@@ -6,8 +6,26 @@ import datetime
 import requests
 from flask import current_app as app
 from sqlalchemy import func
+from app.scoring import score_bracket
+
 
 bracket_bp = Blueprint('bracket', __name__)
+
+@bracket_bp.route('/score_bracket', methods=['POST'])
+def score_user_bracket():
+    # Verify the user.
+    user, mes, errNum = verify_user()
+    if not user:
+        return mes, errNum
+
+    data = request.get_json()
+    user_bracket = data.get('user_bracket')
+    live_bracket = data.get('live_bracket')
+    if not user_bracket or not live_bracket:
+        return jsonify({'error': 'Both user_bracket and live_bracket are required'}), 400
+    # Calculate the score by comparing the user bracket with the live bracket.
+    score = score_bracket(user_bracket, live_bracket)
+    return jsonify({'score': score}), 200
 
 # Returns live bracket from API
 @bracket_bp.route('/get_bracket', methods=['GET'])

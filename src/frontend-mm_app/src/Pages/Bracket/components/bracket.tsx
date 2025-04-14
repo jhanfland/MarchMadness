@@ -336,59 +336,106 @@ const Bracket = forwardRef(function Bracket({ bracket, liveBracket }: BracketPro
    * @param data 
    * @returns 
    */
-  function parseSelectedTeamData (data: any) {
-    // means full bracket
-    if (Object.keys(selectedTeams).length != 63) {
-      // May want to disable the save button until they are allowed to do all 63 teams picked
+  function parseSelectedTeamData(selectedTeams: Record<string, string>) {
+    // Ensure the full bracket has been picked.
+    if (Object.keys(selectedTeams).length !== 63) {
       return undefined;
     }
-
-    // want bracket format to look like this after manipulating data, fill seeds with team name, team seed, and team selected by user for each matchup of each round
-    return {
-      id: bracket.id,
+    
+    // Create the skeleton of the bracket based on the expected structure.
+    const parsedBracket = {
+      // Use the bracket id and title from the current bracket state (assuming available globally)
+      id: bracket.id, // assuming "bracket" object exists in this context
       title: bracket.title,
       regions: {
         EAST: {
           rounds: [
-            {title: 'First Round', seeds: []},
-            {title: 'Second Round', seeds: []},
-            {title: 'Sweet 16', seeds: []},
-            {title: 'Elite 8', seeds: []}
+            { title: "First Round", seeds: [] },
+            { title: "Second Round", seeds: [] },
+            { title: "Sweet 16", seeds: [] },
+            { title: "Elite 8", seeds: [] }
           ]
         },
         MIDWEST: {
           rounds: [
-            {title: 'First Round', seeds: []},
-            {title: 'Second Round', seeds: []},
-            {title: 'Sweet 16', seeds: []},
-            {title: 'Elite 8', seeds: []}
+            { title: "First Round", seeds: [] },
+            { title: "Second Round", seeds: [] },
+            { title: "Sweet 16", seeds: [] },
+            { title: "Elite 8", seeds: [] }
           ]
-        }, 
+        },
         SOUTH: {
           rounds: [
-            {title: 'First Round', seeds: []},
-            {title: 'Second Round', seeds: []},
-            {title: 'Sweet 16', seeds: []},
-            {title: 'Elite 8', seeds: []}
+            { title: "First Round", seeds: [] },
+            { title: "Second Round", seeds: [] },
+            { title: "Sweet 16", seeds: [] },
+            { title: "Elite 8", seeds: [] }
           ]
         },
         WEST: {
           rounds: [
-            {title: 'First Round', seeds: []},
-            {title: 'Second Round', seeds: []},
-            {title: 'Sweet 16', seeds: []},
-            {title: 'Elite 8', seeds: []}
+            { title: "First Round", seeds: [] },
+            { title: "Second Round", seeds: [] },
+            { title: "Sweet 16", seeds: [] },
+            { title: "Elite 8", seeds: [] }
           ]
         },
         FINAL_FOUR: {
           rounds: [
-            {title: 'Final Four', seeds: []},
-            {title: 'National Championship', seeds: []},
+            { title: "Final Four", seeds: [] },
+            { title: "National Championship", seeds: [] },
           ]
         }
       }
-    }
+    };
+  
+    // Process each key from selectedTeams.
+    Object.keys(selectedTeams).forEach((key) => {
+      // The key format is "roundIndex-seedIndex-REGION".
+      // For regions like FINAL FOUR, key may contain a space so we need to standardize it.
+      const parts = key.split("-");
+      if (parts.length < 3) return; // skip if invalid
+  
+      const roundIndexStr = parts[0];
+      const _seedIndex = parts[1];
+      // Join remaining parts in case region has hyphens or spaces.
+      const regionRaw = parts.slice(2).join("-").trim();
+      // Map "FINAL FOUR" to "FINAL_FOUR" (you can extend this mapping if needed).
+      const regionKey = regionRaw === "FINAL FOUR" ? "FINAL_FOUR" : regionRaw;
+      const roundIndex = parseInt(roundIndexStr, 10);
+  
+      // The value format is "teamSeed_Team Name-gameId-teamPosition"
+      // Example: "1_Duke Blue Devils-1-0"
+      const value = selectedTeams[key];
+      const valueParts = value.split("-");
+      if (valueParts.length < 3) return; // skip if not valid
+    
+      // Extract team seed and team name from the first part.
+      const [teamSeed, ...teamNameParts] = valueParts[0].split("_");
+      const teamName = teamNameParts.join("_").trim();
+      const gameId = parseInt(valueParts[1], 10);
+      // teamPosition is available as valueParts[2] if needed.
+      
+      // Create a seed object with the winner set.
+      const seedObj = {
+        id: gameId, // or use a composite key if needed
+        winner: teamName,
+        teams: [{ name: teamName, seed: teamSeed }]
+      };
+  
+      // Push this seed object into the proper region and round.
+      if (
+        parsedBracket.regions[regionKey] &&
+        parsedBracket.regions[regionKey].rounds[roundIndex]
+      ) {
+        parsedBracket.regions[regionKey].rounds[roundIndex].seeds.push(seedObj);
+      }
+    });
+  
+    return parsedBracket;
   }
+  
+  
 
   return (
     <div>
