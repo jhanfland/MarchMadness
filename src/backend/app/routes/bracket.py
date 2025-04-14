@@ -99,6 +99,27 @@ def get_user_bracket(bracket_number):
         'bracket': bracket.bracket_selection
     }), 200
 
+@bracket_bp.route('/get_user_bracket_numbers', methods=['GET'])
+def get_user_bracket_numbers():
+    user, mes, errNum = verify_user()
+    if user is None:
+        return mes, errNum
+
+    # Query all bracket_numbers for the user
+    bracket_numbers = (
+        db.session.query(Bracket.bracket_number)
+        .filter_by(id=user.id)
+        .order_by(Bracket.bracket_number.asc())
+        .all()
+    )
+    # Extract integers from result tuples
+    bracket_numbers = [bn[0] for bn in bracket_numbers]
+
+    return jsonify({
+        'message': 'Bracket numbers retrieved successfully',
+        'bracket_numbers': bracket_numbers
+    }), 200
+
 # Created User Bracket
 @bracket_bp.route('/create_user_bracket', methods=['POST'])
 def create_user_bracket():
