@@ -78,17 +78,18 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
 
   const saveBracket = async (bracket_number: number) => {
     const token = localStorage.getItem("token");
-
-    // grabs parsed bracker
+  
+    // Grab the parsed bracket from the reference.
     const bracket = bracketRef.current?.getParsedBracketData();
     console.log("parsedBracketData", bracket);
     if (!bracket) {
-      alert("Please finish all 63 picks before saving!")
+      alert("Please finish all 63 picks before saving!");
       return;
     }
-
+  
     try {
-      const response = await fetch(`${BACKEND_URL}/create_user_bracket`, {
+      // Save user bracket via the create_user_bracket endpoint.
+      const saveResponse = await fetch(`${BACKEND_URL}/create_user_bracket`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -99,8 +100,31 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
           bracket_selection: bracket,
         }),
       });
-
-      const data = await response.json(); 
+      const saveData = await saveResponse.json();
+  
+      // Retrieve the saved user bracket.
+      const userBracketResponse = await fetch(`${BACKEND_URL}/get_user_bracket/${bracket_number}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const userBracketData = await userBracketResponse.json();
+      if (!userBracketData.bracket) {
+        throw new Error("User bracket not found");
+      }
+  
+      // Retrieve the live bracket from the external API endpoint.
+      const liveBracketResponse = await fetch(`${BACKEND_URL}/get_bracket`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const liveBracketData = await liveBracketResponse.json();
+      console.log("User bracket: ", userBracketData.bracket)
+      console.log("Live Bracket: ", liveBracketData)
+      // Call the scoring endpoint with both the user and live bracket JSON objects.
       const scoreResponse = await fetch(`${BACKEND_URL}/score_bracket`, {
         method: "POST",
         headers: {
@@ -108,11 +132,11 @@ export default function BracketPage({ initialBrackets = [] }: { initialBrackets?
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          // Pass the saved user bracket id
-          user_bracket_id: bracket_number,
+          user_bracket: userBracketData.bracket,
+          live_bracket: liveBracketData,
         }),
       });
-      
+  
       if (!scoreResponse.ok) throw new Error("Scoring failed");
       const scoreData = await scoreResponse.json();
       setScore(scoreData.score); // update the score state with returned score

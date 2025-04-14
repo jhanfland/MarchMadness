@@ -1,19 +1,4 @@
-"""
-This module provides functionality to score a March Madness bracket by comparing
-a user’s picks with the actual results:
-    - 10 points for each correct pick in the First Round
-    - 20 for Second Round
-    - 40 for Sweet 16
-    - 80 for Elite 8
-    - 160 for Final 4
-    - 320 for Championship
-
-Both the user and actual bracket JSONs can be structured in two ways:
-1. A complete rounds-based bracket with a "rounds" key.
-2. A region-based bracket with a "regions" key (the user bracket format).
-   Note: The round "National Championship" is remapped to "Championship".
-If a game in the actual bracket does not yet have a winner, no points are added.
-"""
+from datetime import datetime
 
 # Points awarded per round
 ROUND_POINTS = {
@@ -21,157 +6,137 @@ ROUND_POINTS = {
     "Second Round": 20,
     "Sweet 16": 40,
     "Elite 8": 80,
-    "Final 4": 160,
-    "Championship": 320
+    "Final Four": 160,
+    "National Championship": 320,
 }
 
-def extract_rounds(bracket):
+def extract_game_number(game):
     """
-    Convert a bracket JSON into a rounds-based dictionary.
-    This handles both:
-      - A bracket with a "rounds" key (already rounds-based)
-      - A bracket with a "regions" key (user bracket format)
-    It also remaps "National Championship" to "Championship".
+    Attempt to extract a game number from the game 'title'
+    by splitting on 'Game '.
+    If unsuccessful, fall back to the scheduled timestamp.
     """
-    all_rounds = {}
+    title = game.get("title", "")
+    try:
+        # Example: "South Regional - First Round - Game 3"
+        parts = title.split("Game ")
+        if len(parts) >= 2:
+            return int(parts[-1])
+    except ValueError:
+        pass
+    # Fall back to scheduled time (converted to timestamp)
+    sched = game.get("scheduled")
+    if sched:
+        try:
+            dt = datetime.fromisoformat(sched.replace("Z", "+00:00"))
+            return dt.timestamp()
+        except Exception:
+            pass
+    return 0
 
-    if "rounds" in bracket:
-        for round_obj in bracket["rounds"]:
-            # Use round_obj["title"], remapping if needed.
-            round_title = round_obj.get("title")
-            if round_title == "National Championship":
-                round_title = "Championship"
-            # The API live bracket may not include a "winner" so compute it here.
-            seeds = round_obj.get("seeds", [])
-            for seed in seeds:
-                # If winner is not provided and scores are available, compute it.
-                if seed.get("winner") is None and "homeScore" in seed and "awayScore" in seed:
-                    try:
-                        home = seed["homeScore"]
-                        away = seed["awayScore"]
-                        if home > away:
-                            seed["winner"] = seed["teams"][0]["name"]
-                        elif away > home:
-                            seed["winner"] = seed["teams"][1]["name"]
-                    except (IndexError, TypeError):
-                        pass
-            all_rounds.setdefault(round_title, []).extend(seeds)
-        return all_rounds
-
-    elif "regions" in bracket:
-        # User bracket format: iterate over regions and their rounds.
-        for region, region_data in bracket["regions"].items():
-            rounds_list = region_data.get("rounds", [])
-            for round_obj in rounds_list:
-                round_title = round_obj.get("title")
-                if round_title == "National Championship":
-                    round_title = "Championship"
-                all_rounds.setdefault(round_title, []).extend(round_obj.get("seeds", []))
-        return all_rounds
-    else:
-        return {}
-
-def transform_live_bracket(live_json):
+def determine_winner(game):
     """
-    Transform the raw live bracket (from the API) into a rounds-based structure.
-    This replicates the logic from LiveBracketPage.tsx in Python.
-    We assume the raw live JSON has a "rounds" array. We skip the first round (if needed)
-    and then for rounds with bracketed info versus direct games.
-    Each seed's winner is computed from scores if not already present.
+    Determines the winner of the game.
     """
-    rounds_out = []
-    # We assume live_json has "rounds" key.
-    rounds = live_json.get("rounds", [])
-    # Skip the first round if necessary. (Based on your LiveBracketPage.tsx, idx0 is skipped.)
-    for idx, round_data in enumerate(rounds):
-        if idx == 0:
-            continue
-        seed_list = []
-        if idx < 5:
-            # For rounds that have "bracketed" info.
-            bracketed = round_data.get("bracketed", [])
-            # For each region in bracketed, sort games and process seeds.
-            for region_data in bracketed:
-                games = region_data.get("games", [])
-                games.sort(key=lambda g: int(g.get("title", "Game 99").split("Game ")[-1]))
-                for game in games:
-                    team_home = game.get("home", {})
-                    team_away = game.get("away", {})
-                    seed = {
-                        "id": game.get("id"),
-                        "teams": [
-                            {"name": team_home.get("alias", "TBD"), "seed": team_home.get("seed")},
-                            {"name": team_away.get("alias", "TBD"), "seed": team_away.get("seed")}
-                        ],
-                        "homeScore": game.get("home_points"),
-                        "awayScore": game.get("away_points"),
-                        "date": game.get("scheduled", ""),
-                        "region": (region_data.get("bracket", {}).get("name") or "").split(" ")[0].toUpperCase()  # crude extraction
-                    }
-                    # Compute winner if scores are available.
-                    if seed.get("homeScore") is not None and seed.get("awayScore") is not None:
-                        if seed["homeScore"] > seed["awayScore"]:
-                            seed["winner"] = seed["teams"][0]["name"]
-                        elif seed["awayScore"] > seed["homeScore"]:
-                            seed["winner"] = seed["teams"][1]["name"]
-                    seed_list.append(seed)
-        else:
-            # For rounds after idx 4 (e.g., Final Four / Championship)
-            games = round_data.get("games", [])
-            for game in games:
-                team_home = game.get("home", {})
-                team_away = game.get("away", {})
-                seed = {
-                    "id": game.get("id"),
-                    "teams": [
-                        {"name": team_home.get("alias", "TBD"), "seed": team_home.get("seed")},
-                        {"name": team_away.get("alias", "TBD"), "seed": team_away.get("seed")}
-                    ],
-                    "homeScore": game.get("home_points"),
-                    "awayScore": game.get("away_points"),
-                    "date": game.get("scheduled", ""),
-                    "region": "FINAL FOUR"
-                }
-                if seed.get("homeScore") is not None and seed.get("awayScore") is not None:
-                    if seed["homeScore"] > seed["awayScore"]:
-                        seed["winner"] = seed["teams"][0]["name"]
-                    elif seed["awayScore"] > seed["homeScore"]:
-                        seed["winner"] = seed["teams"][1]["name"]
-                seed_list.append(seed)
+    home = game.get("home", {}).get("name")
+    away = game.get("away", {}).get("name")
+    home_pts = game.get("home_points")
+    away_pts = game.get("away_points")
+    if home_pts is not None and away_pts is not None:
+        return home if home_pts > away_pts else away
+    return None
 
-        # Use the API round's "name" as the title.
-        round_obj = {
-            "title": round_data.get("name"),
-            "seeds": seed_list
-        }
-        rounds_out.append(round_obj)
-    return {"rounds": rounds_out}
-
-def score_bracket(user_bracket, actual_bracket):
+def parse_live_winners(live_bracket):
     """
-    Calculate the score for a user's bracket based on the actual results.
-    For the actual bracket, we first transform the live API data into a rounds-based structure.
-    Then we extract rounds from both user and live brackets and compare them.
+    Parses the live bracket JSON to extract winners in a structure that mirrors the user bracket.
+    Instead of relying on hardcoded region mappings, we use the "bracket" information embedded in the
+    live bracket's "bracketed" array.
     
-    Args:
-        user_bracket (dict): The user's bracket JSON (region-based).
-        actual_bracket (dict): The raw live bracket JSON from the API.
+    The expected live bracket structure:
+      - Rounds 1-4: Each round contains a "bracketed" array of regions.
+          Each region object should contain a "bracket" dict with a "name" attribute
+          (for example, "South Regional").
+      - Rounds 5 and 6 (Final Four and Championship): Read directly from the "games" list.
     
-    Returns:
-        int: Total score computed for the user's bracket.
+    Returns a dictionary:
+      winners[region_key][round_index] = [winner, winner, ...]
+    
+    The region_key is derived by removing the " Regional" suffix (if present)
+    and then uppercasing it to align with user bracket keys (i.e. "SOUTH", "MIDWEST", "EAST", "WEST").
     """
-    # Transform the raw live bracket into rounds-based format.
-    transformed_live = transform_live_bracket(actual_bracket)
-    
-    user_rounds = extract_rounds(user_bracket)
-    actual_rounds = extract_rounds(transformed_live)
-    
+    rounds = live_bracket["rounds"]
+    # Initialize winners dictionary for each region and the Final Four.
+    winners = {
+        "SOUTH": [[] for _ in range(4)],
+        "MIDWEST": [[] for _ in range(4)],
+        "EAST": [[] for _ in range(4)],
+        "WEST": [[] for _ in range(4)],
+        "FINAL_FOUR": [[] for _ in range(2)]
+    }
+
+    # Process rounds 1 to 4 (typically First Round, Second Round, Sweet 16, Elite 8)
+    # Each round has a "bracketed" array. We use the bracket info to get the region key.
+    for round_index in range(1, 5):
+        round_data = rounds[round_index]
+        bracketed_list = round_data.get("bracketed", [])
+        for region_item in bracketed_list:
+            if "bracket" in region_item and "name" in region_item["bracket"]:
+                region_name = region_item["bracket"]["name"]
+                region_key = region_name.replace(" Regional", "").upper()
+            else:
+                continue
+
+            games = region_item.get("games", [])
+            games_sorted = sorted(games, key=extract_game_number)
+            for game in games_sorted:
+                winner = determine_winner(game)
+                winners[region_key][round_index - 1].append(winner)
+
+    # Process Round 5: Final Four – these games are not divided by region.
+    final_four_games = rounds[5].get("games", [])
+    final_four_games_sorted = sorted(final_four_games, key=extract_game_number)
+    # If exactly two games are found, swap the order to match the expected ordering.
+    if len(final_four_games_sorted) == 2:
+         final_four_games_sorted = [final_four_games_sorted[1], final_four_games_sorted[0]]
+    for game in final_four_games_sorted:
+         winner = determine_winner(game)
+         winners["FINAL_FOUR"][0].append(winner)
+
+    # Process Round 6: National Championship – again, not divided by region.
+    championship_games = rounds[6].get("games", [])
+    championship_games_sorted = sorted(championship_games, key=extract_game_number)
+    for game in championship_games_sorted:
+         winner = determine_winner(game)
+         winners["FINAL_FOUR"][1].append(winner)
+
+    return winners
+
+def score_bracket(user_bracket, live_bracket):
+    """
+    Scores the user bracket against the live bracket.
+    The user bracket is assumed to have proper ordering per region, including FINAL_FOUR.
+    This function uses the winners extracted from the live bracket to compare against the user selections.
+    """
+    live_winners = parse_live_winners(live_bracket)
+    print("live bracket winners:", live_winners, flush=True)
+    print("user bracket:", user_bracket, flush=True)
     total_score = 0
-    for round_name, points in ROUND_POINTS.items():
-        user_games = user_rounds.get(round_name, [])
-        actual_games = actual_rounds.get(round_name, [])
-        for user_game, actual_game in zip(user_games, actual_games):
-            if actual_game.get("winner") is not None:
-                if user_game.get("winner") == actual_game.get("winner"):
-                    total_score += points
+
+    # Iterate through each region in the user bracket (including FINAL_FOUR).
+    for region, region_data in user_bracket["regions"].items():
+        rounds_list = region_data.get("rounds", [])
+        for round_index, round_obj in enumerate(rounds_list):
+            round_title = round_obj.get("title")
+            seeds = round_obj.get("seeds", [])
+            for game_index, seed in enumerate(seeds):
+                user_winner = seed.get("winner")
+                try:
+                    live_winner = live_winners[region][round_index][game_index]
+                    print("Region:", region, "Round:", round_title, 
+                          "User winner:", user_winner, "Live winner:", live_winner, flush=True)
+                    if user_winner == live_winner:
+                        total_score += ROUND_POINTS.get(round_title, 0)
+                except (IndexError, KeyError):
+                    continue
+
     return total_score

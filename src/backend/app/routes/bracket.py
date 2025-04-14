@@ -6,37 +6,25 @@ import datetime
 import requests
 from flask import current_app as app
 from sqlalchemy import func
-from scoring import score_bracket
+from app.scoring import score_bracket
+
 
 bracket_bp = Blueprint('bracket', __name__)
 
 @bracket_bp.route('/score_bracket', methods=['POST'])
 def score_user_bracket():
-    # User verification
+    # Verify the user.
     user, mes, errNum = verify_user()
     if not user:
         return mes, errNum
 
     data = request.get_json()
-    user_bracket_id = data.get('user_bracket_id')
-    if not user_bracket_id:
-        return jsonify({'error': 'User bracket id required'}), 400
-
-    # Retrieve the user's bracket selection from the database using user id and bracket number
-    user_bracket_obj = Bracket.query.filter_by(id=user.id, bracket_number=user_bracket_id).first()
-    if not user_bracket_obj:
-        return jsonify({'error': 'User bracket not found'}), 404
-    user_bracket = user_bracket_obj.bracket_selection
-
-    # Get the live bracket by directly calling the external API (no separate saving endpoint)
-    live_url = f"https://api.sportradar.com/ncaamb/trial/v8/en/tournaments/{mm_tournament_id}/schedule.json?api_key={api_key}"
-    live_response = requests.get(live_url, headers={"accept": "application/json"})
-    if live_response.status_code != 200:
-        return jsonify({'error': 'Failed to fetch live bracket from the API'}), 500
-    actual_bracket = live_response.json()
-
-    # Calculate the score using the scoring function from scoring.py
-    score = score_bracket(user_bracket, actual_bracket)
+    user_bracket = data.get('user_bracket')
+    live_bracket = data.get('live_bracket')
+    if not user_bracket or not live_bracket:
+        return jsonify({'error': 'Both user_bracket and live_bracket are required'}), 400
+    # Calculate the score by comparing the user bracket with the live bracket.
+    score = score_bracket(user_bracket, live_bracket)
     return jsonify({'score': score}), 200
 
 # Returns live bracket from API
