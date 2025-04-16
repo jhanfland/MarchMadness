@@ -1,4 +1,10 @@
-import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
+import {
+  useEffect,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  Children,
+} from "react";
 import {
   Bracket as BracketType,
   Region,
@@ -12,7 +18,7 @@ import {
   SeedItem,
   SeedTeam,
 } from "react-brackets";
-
+import { C } from "vitest/dist/chunks/reporters.d.CfRkRKN2.js";
 
 interface BracketProps {
   bracket: BracketType; // The 'bracket' prop is of type BracketType
@@ -27,7 +33,7 @@ interface CustomSeedProps {
   region: Region;
   selection: Record<string, string>;
   setSelection: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  liveBracket: Boolean
+  liveBracket: Boolean;
 }
 
 const CustomSeed = ({
@@ -38,7 +44,7 @@ const CustomSeed = ({
   roundIndex,
   selection,
   setSelection,
-  liveBracket
+  liveBracket,
 }: CustomSeedProps) => {
   // return for live bracket, else statement for user bracket
   if (liveBracket) {
@@ -46,20 +52,46 @@ const CustomSeed = ({
       <Seed mobileBreakpoint={breakpoint}>
         <SeedItem>
           <SeedTeam>
-          <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-            <span>{`${seed.teams[0]?.seed ?? ""}  ${seed.teams[0]?.name ?? ""}`}</span>
-            <span>{seed.homeScore ?? ""}</span>
-          </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+              }}
+              className={
+                seed.homeScore > seed.awayScore
+                  ? "text-green-500"
+                  : "text-red-500"
+              }
+            >
+              <span>{`${seed.teams[0]?.seed ?? ""}  ${
+                seed.teams[0]?.name ?? ""
+              }`}</span>
+              <span>{seed.homeScore ?? ""}</span>
+            </div>
           </SeedTeam>
           <SeedTeam>
-            <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-              <span>{`${seed.teams[1]?.seed ?? ""}  ${seed.teams[1]?.name ?? ""}`}</span>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+              }}
+              className={
+                seed.homeScore < seed.awayScore
+                  ? "text-green-500"
+                  : "text-red-500"
+              }
+            >
+              <span>{`${seed.teams[1]?.seed ?? ""}  ${
+                seed.teams[1]?.name ?? ""
+              }`}</span>
               <span>{seed.awayScore ?? ""}</span>
             </div>
           </SeedTeam>
         </SeedItem>
       </Seed>
-    )
+    );
   } else {
     const key = `${roundIndex}-${seedIndex}-${region}`;
 
@@ -74,43 +106,49 @@ const CustomSeed = ({
 
     function updateSelection(teamSeedPlace: string) {
       const [, selectedTeamName] = teamSeedPlace.split("-")[0].split("_");
-    
+
       setSelection((prev) => {
         // parse the current round and region from the key
         const [roundNum, , region] = key.split("-");
         const currentRound = parseInt(roundNum);
-    
-        const removedTeam = prev[key]?.split("-")[0].split("_")[1];    
+
+        const removedTeam = prev[key]?.split("-")[0].split("_")[1];
         // build the updated bracket
         const updateBracket = {} as Record<string, string>;
-    
+
         // k=key, v=value -> loop through all previous selections
         for (const [k, v] of Object.entries(prev)) {
           const [reigonNum, , reigonReg] = k.split("-");
           const round = parseInt(reigonNum);
-    
+
           // determine if this selection is...
           const isSameRegion = reigonReg === region;
           const isLaterRound = round > currentRound;
           const hasRemovedTeam = removedTeam && v.includes(removedTeam);
-    
+
           // keep pick if doesn't involve removed team
           if (!isSameRegion || !isLaterRound || !hasRemovedTeam) {
             updateBracket[k] = v;
           }
         }
-    
+
         updateBracket[key] = teamSeedPlace;
-    
+
         // remove removedTeam from Final Four + Championship
-        if (["EAST", "WEST", "SOUTH", "MIDWEST"].includes(region) && removedTeam) {
+        if (
+          ["EAST", "WEST", "SOUTH", "MIDWEST"].includes(region) &&
+          removedTeam
+        ) {
           for (const k of Object.keys(updateBracket)) {
-            if ((k.includes("FINAL FOUR") || k.includes("CHAMPIONSHIP")) && updateBracket[k].includes(removedTeam)) {
+            if (
+              (k.includes("FINAL FOUR") || k.includes("CHAMPIONSHIP")) &&
+              updateBracket[k].includes(removedTeam)
+            ) {
               delete updateBracket[k];
             }
           }
         }
-    
+
         return updateBracket;
       });
     }
@@ -119,10 +157,26 @@ const CustomSeed = ({
       <Seed mobileBreakpoint={breakpoint}>
         <SeedItem>
           <div className="text-left">
-            <SeedTeam style={{ color: "var(--primary-color)" }}>
-              {`${seed.teams[0]?.seed ?? ""}  ${seed.teams[0]?.name ?? "NO TEAM "}`}
+            <SeedTeam
+              className={
+                selection[key] === value1
+                  ? "text-green-500"
+                  : selection[key] === value2
+                  ? "text-red-500"
+                  : "text-blue-200"
+              }
+            >
+              {`${seed.teams[0]?.seed ?? ""}  ${
+                seed.teams[0]?.name ?? "NO TEAM "
+              }`}
               <input
-                disabled={["TBD", "Midwest Champ", "East Champ", "South Champ", "West Champ"].includes(team1)}
+                disabled={[
+                  "TBD",
+                  "Midwest Champ",
+                  "East Champ",
+                  "South Champ",
+                  "West Champ",
+                ].includes(team1)}
                 type="radio"
                 name={`team-select-${key}`}
                 value={value1}
@@ -130,10 +184,26 @@ const CustomSeed = ({
                 onChange={() => updateSelection(value1)}
               />
             </SeedTeam>
-            <SeedTeam>
-              {`${seed.teams[1]?.seed ?? ""}  ${seed.teams[1]?.name ?? "NO TEAM "}`}
+            <SeedTeam
+              className={
+                selection[key] === value2
+                  ? "text-green-500"
+                  : selection[key] === value1
+                  ? "text-red-500"
+                  : "text-blue-200"
+              }
+            >
+              {`${seed.teams[1]?.seed ?? ""}  ${
+                seed.teams[1]?.name ?? "NO TEAM "
+              }`}
               <input
-                disabled={["TBD", "Midwest Champ", "East Champ", "South Champ", "West Champ"].includes(team2)}
+                disabled={[
+                  "TBD",
+                  "Midwest Champ",
+                  "East Champ",
+                  "South Champ",
+                  "West Champ",
+                ].includes(team2)}
                 type="radio"
                 name={`team-select-${key}`}
                 value={value2}
@@ -148,10 +218,15 @@ const CustomSeed = ({
   }
 };
 
-const Bracket = forwardRef(function Bracket({ bracket, liveBracket }: BracketProps, ref) {
+const Bracket = forwardRef(function Bracket(
+  { bracket, liveBracket }: BracketProps,
+  ref
+) {
   const [selectedRegion, setSelectedRegion] = useState<Region>("EAST");
 
-  const [selectedTeams, setSelectedTeams] = useState<Record<string, string>>({});
+  const [selectedTeams, setSelectedTeams] = useState<Record<string, string>>(
+    {}
+  );
 
   const [rounds, setRounds] = useState<Round[]>([]);
 
@@ -208,19 +283,25 @@ const Bracket = forwardRef(function Bracket({ bracket, liveBracket }: BracketPro
         const team1Key = `${i - 1}-${j}-${selectedRegion}`;
         const team2Key = `${i - 1}-${j + 1}-${selectedRegion}`;
 
-        const [team1Seed, team1] = selectedTeams[team1Key]?.split("-")[0].split("_") || [undefined, "TBD"];
-        const [team2Seed, team2] = selectedTeams[team2Key]?.split("-")[0].split("_") || [undefined, "TBD"];
+        const [team1Seed, team1] = selectedTeams[team1Key]
+          ?.split("-")[0]
+          .split("_") || [undefined, "TBD"];
+        const [team2Seed, team2] = selectedTeams[team2Key]
+          ?.split("-")[0]
+          .split("_") || [undefined, "TBD"];
 
         nextSeeds.push({
           id: j / 2 + 1,
-          teams: [{ name: team1, seed: team1Seed}, { name: team2, seed: team2Seed}],
+          teams: [
+            { name: team1, seed: team1Seed },
+            { name: team2, seed: team2Seed },
+          ],
         });
       }
 
       // add other rounds with seeds to bracket
       newRounds.push({
-        title:
-          i === 1 ? "Round of 32" : i === 2 ? "Sweet 16" : "Elite 8",
+        title: i === 1 ? "Round of 32" : i === 2 ? "Sweet 16" : "Elite 8",
         seeds: nextSeeds,
       });
     }
@@ -230,16 +311,16 @@ const Bracket = forwardRef(function Bracket({ bracket, liveBracket }: BracketPro
 
   useEffect(() => {
     const regionOrder = ["EAST", "WEST", "SOUTH", "MIDWEST"];
-  
+
     const updatedFinalFour = [...finalFourRounds];
-  
+
     const regionWinners: Record<string, string> = {
       EAST: "East Champ",
       WEST: "West Champ",
       SOUTH: "South Champ",
       MIDWEST: "Midwest Champ",
     };
-  
+
     // Step 1: Get each region's champion
     for (const region of regionOrder) {
       const winnerKey = `3-0-${region}`;
@@ -249,29 +330,45 @@ const Bracket = forwardRef(function Bracket({ bracket, liveBracket }: BracketPro
         regionWinners[region] = teamName + "_" + teamSeed;
       }
     }
-  
+
     // Step 2: Set Final Four matchups
     updatedFinalFour[0].seeds[0].teams = [
-      { name: regionWinners["EAST"].split("_")[0], seed: regionWinners["EAST"].split("_")[1] || undefined},
-      { name: regionWinners["MIDWEST"].split("_")[0], seed: regionWinners["MIDWEST"].split("_")[1] || undefined },
+      {
+        name: regionWinners["EAST"].split("_")[0],
+        seed: regionWinners["EAST"].split("_")[1] || undefined,
+      },
+      {
+        name: regionWinners["MIDWEST"].split("_")[0],
+        seed: regionWinners["MIDWEST"].split("_")[1] || undefined,
+      },
     ];
     updatedFinalFour[0].seeds[1].teams = [
-      { name: regionWinners["SOUTH"].split("_")[0], seed: regionWinners["SOUTH"].split("_")[1] || undefined },
-      { name: regionWinners["WEST"].split("_")[0], seed: regionWinners["WEST"].split("_")[1] || undefined },
+      {
+        name: regionWinners["SOUTH"].split("_")[0],
+        seed: regionWinners["SOUTH"].split("_")[1] || undefined,
+      },
+      {
+        name: regionWinners["WEST"].split("_")[0],
+        seed: regionWinners["WEST"].split("_")[1] || undefined,
+      },
     ];
-  
+
     // Step 3: Pull semifinal winners for the Championship
     const semi1Key = `0-0-FINAL FOUR`;
     const semi2Key = `0-1-FINAL FOUR`;
-  
-    const [semi1Seed, semi1Winner] = selectedTeams[semi1Key]?.split("-")[0].split("_") || [undefined, "TBD"];
-    const [semi2Seed, semi2Winner] = selectedTeams[semi2Key]?.split("-")[0].split("_") || [undefined, "TBD"];
-  
+
+    const [semi1Seed, semi1Winner] = selectedTeams[semi1Key]
+      ?.split("-")[0]
+      .split("_") || [undefined, "TBD"];
+    const [semi2Seed, semi2Winner] = selectedTeams[semi2Key]
+      ?.split("-")[0]
+      .split("_") || [undefined, "TBD"];
+
     updatedFinalFour[1].seeds[0].teams = [
-      { name: semi1Winner, seed: semi1Seed},
-      { name: semi2Winner, seed: semi2Seed},
+      { name: semi1Winner, seed: semi1Seed },
+      { name: semi2Winner, seed: semi2Seed },
     ];
-  
+
     setFinalFourRounds(updatedFinalFour);
   }, [selectedTeams]);
 
@@ -303,45 +400,50 @@ const Bracket = forwardRef(function Bracket({ bracket, liveBracket }: BracketPro
             )}
           />
         ) : (
-          <ReactBracket rounds={bracket[0].rounds} renderSeedComponent={(props) => (
-            <CustomSeed
-              {...props}
-              region={selectedRegion}
-              selection={selectedTeams}
-              setSelection={setSelectedTeams}
-              liveBracket={liveBracket}
-            />
-          )}
-        />
+          <ReactBracket
+            rounds={bracket[0].rounds}
+            renderSeedComponent={(props) => (
+              <CustomSeed
+                {...props}
+                region={selectedRegion}
+                selection={selectedTeams}
+                setSelection={setSelectedTeams}
+                liveBracket={liveBracket}
+              />
+            )}
+          />
         )}
-    </>
+      </>
     );
   }
 
-  
-
-  console.log("selected Teams", selectedTeams, "parsed data", parseSelectedTeamData(selectedTeams));
+  console.log(
+    "selected Teams",
+    selectedTeams,
+    "parsed data",
+    parseSelectedTeamData(selectedTeams)
+  );
   /**
    * This is how we propogate it up to save button
    */
   useImperativeHandle(ref, () => ({
     getParsedBracketData: () => parseSelectedTeamData(selectedTeams),
   }));
-  // 
+  //
   /**
    * We need to move this function to BracketPage but will work on that later when working with Norris
    * This method should parse the data properly in this format, for easy db retrieval, and score comparison
    * Format of JSON
    * 0-1-EAST: "8_Mississippi State Bulldogs-2-0" --> (Round(horizontal))-(Index(vertical))-(REGION):(Seed)_(Team Name)-(Index(vertical) + 1)-(teamIndex from matchup -- either 0 or 1)
-   * @param data 
-   * @returns 
+   * @param data
+   * @returns
    */
   function parseSelectedTeamData(selectedTeams: Record<string, string>) {
     // Ensure the full bracket has been picked.
     if (Object.keys(selectedTeams).length !== 63) {
       return undefined;
     }
-    
+
     // Create the skeleton of the bracket based on the expected structure.
     const parsedBracket = {
       // Use the bracket id and title from the current bracket state (assuming available globally)
@@ -353,49 +455,49 @@ const Bracket = forwardRef(function Bracket({ bracket, liveBracket }: BracketPro
             { title: "First Round", seeds: [] },
             { title: "Second Round", seeds: [] },
             { title: "Sweet 16", seeds: [] },
-            { title: "Elite 8", seeds: [] }
-          ]
+            { title: "Elite 8", seeds: [] },
+          ],
         },
         MIDWEST: {
           rounds: [
             { title: "First Round", seeds: [] },
             { title: "Second Round", seeds: [] },
             { title: "Sweet 16", seeds: [] },
-            { title: "Elite 8", seeds: [] }
-          ]
+            { title: "Elite 8", seeds: [] },
+          ],
         },
         SOUTH: {
           rounds: [
             { title: "First Round", seeds: [] },
             { title: "Second Round", seeds: [] },
             { title: "Sweet 16", seeds: [] },
-            { title: "Elite 8", seeds: [] }
-          ]
+            { title: "Elite 8", seeds: [] },
+          ],
         },
         WEST: {
           rounds: [
             { title: "First Round", seeds: [] },
             { title: "Second Round", seeds: [] },
             { title: "Sweet 16", seeds: [] },
-            { title: "Elite 8", seeds: [] }
-          ]
+            { title: "Elite 8", seeds: [] },
+          ],
         },
         FINAL_FOUR: {
           rounds: [
             { title: "Final Four", seeds: [] },
             { title: "National Championship", seeds: [] },
-          ]
-        }
-      }
+          ],
+        },
+      },
     };
-  
+
     // Process each key from selectedTeams.
     Object.keys(selectedTeams).forEach((key) => {
       // The key format is "roundIndex-seedIndex-REGION".
       // For regions like FINAL FOUR, key may contain a space so we need to standardize it.
       const parts = key.split("-");
       if (parts.length < 3) return; // skip if invalid
-  
+
       const roundIndexStr = parts[0];
       const _seedIndex = parts[1];
       // Join remaining parts in case region has hyphens or spaces.
@@ -403,26 +505,26 @@ const Bracket = forwardRef(function Bracket({ bracket, liveBracket }: BracketPro
       // Map "FINAL FOUR" to "FINAL_FOUR" (you can extend this mapping if needed).
       const regionKey = regionRaw === "FINAL FOUR" ? "FINAL_FOUR" : regionRaw;
       const roundIndex = parseInt(roundIndexStr, 10);
-  
+
       // The value format is "teamSeed_Team Name-gameId-teamPosition"
       // Example: "1_Duke Blue Devils-1-0"
       const value = selectedTeams[key];
       const valueParts = value.split("-");
       if (valueParts.length < 3) return; // skip if not valid
-    
+
       // Extract team seed and team name from the first part.
       const [teamSeed, ...teamNameParts] = valueParts[0].split("_");
       const teamName = teamNameParts.join("_").trim();
       const gameId = parseInt(valueParts[1], 10);
       // teamPosition is available as valueParts[2] if needed.
-      
+
       // Create a seed object with the winner set.
       const seedObj = {
         id: gameId, // or use a composite key if needed
         winner: teamName,
-        teams: [{ name: teamName, seed: teamSeed }]
+        teams: [{ name: teamName, seed: teamSeed }],
       };
-  
+
       // Push this seed object into the proper region and round.
       if (
         parsedBracket.regions[regionKey] &&
@@ -431,11 +533,9 @@ const Bracket = forwardRef(function Bracket({ bracket, liveBracket }: BracketPro
         parsedBracket.regions[regionKey].rounds[roundIndex].seeds.push(seedObj);
       }
     });
-  
+
     return parsedBracket;
   }
-  
-  
 
   return (
     <div>
@@ -460,6 +560,6 @@ const Bracket = forwardRef(function Bracket({ bracket, liveBracket }: BracketPro
       )}
     </div>
   );
-})
+});
 
 export default Bracket;
