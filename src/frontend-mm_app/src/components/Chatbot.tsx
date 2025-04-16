@@ -165,6 +165,7 @@ const Chatbot = () => {
             //         .catch(() => {
             //           _updateLastMessage("I'm sorry, I couldn't understand that. Please try again.");
             //         });
+            _updateLastMessage("Handle this case later");
         }
       }
     })
