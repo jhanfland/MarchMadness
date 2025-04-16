@@ -5,6 +5,8 @@ import logo from "./../images/logo.png";
 
 export function LiveScoresPage() {
         
+    // 
+
     // useEffect(() => {march_maddness_data}, []);
 
     // const [items, setItems] = useState([]);
@@ -40,6 +42,8 @@ export function LiveScoresPage() {
 
     }
 
+    // ButtonBar dynamically adjusts itself based on how many dicts are in the 
+    // "buttons" variable
     const buttons = [{name: "Round of 64", date:"Mar 20 - 21"},
                      {name: "Round of 32", date: "Mar 22 - 23"},
                      {name: "Sweet 16", date: "Mar 27 - 28"},
