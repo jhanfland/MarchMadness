@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import {
   Bracket as BracketType,
   Region,
@@ -17,6 +17,8 @@ import {
 interface BracketProps {
   bracket: BracketType; // The 'bracket' prop is of type BracketType
   liveBracket: Boolean; // The 'liveBracket' prop is of type boolean
+  onChange?: (selected: Record<string, string>) => void; // updates selectedTeamsMap when team is picked
+  initialSelection?: Record<string, string>; // how saved bracket data is passed from bracketpage to bracket
 }
 
 interface CustomSeedProps {
@@ -72,11 +74,47 @@ const CustomSeed = ({
     const value1 = `${team1seed}_${team1}-${seed.id}-0`;
     const value2 = `${team2seed}_${team2}-${seed.id}-1`;
 
-    console.log("val1", value1);
-    console.log("val2", value2);
-
     function updateSelection(teamSeedPlace: string) {
-      setSelection((prev) => ({ ...prev, [key]: teamSeedPlace }));
+      const [, selectedTeamName] = teamSeedPlace.split("-")[0].split("_");
+    
+      setSelection((prev) => {
+        // parse the current round and region from the key
+        const [roundNum, , region] = key.split("-");
+        const currentRound = parseInt(roundNum);
+    
+        const removedTeam = prev[key]?.split("-")[0].split("_")[1];    
+        // build the updated bracket
+        const updateBracket = {} as Record<string, string>;
+    
+        // k=key, v=value -> loop through all previous selections
+        for (const [k, v] of Object.entries(prev)) {
+          const [reigonNum, , reigonReg] = k.split("-");
+          const round = parseInt(reigonNum);
+    
+          // determine if this selection is...
+          const isSameRegion = reigonReg === region;
+          const isLaterRound = round > currentRound;
+          const hasRemovedTeam = removedTeam && v.includes(removedTeam);
+    
+          // keep pick if doesn't involve removed team
+          if (!isSameRegion || !isLaterRound || !hasRemovedTeam) {
+            updateBracket[k] = v;
+          }
+        }
+    
+        updateBracket[key] = teamSeedPlace;
+    
+        // remove removedTeam from Final Four + Championship
+        if (["EAST", "WEST", "SOUTH", "MIDWEST"].includes(region) && removedTeam) {
+          for (const k of Object.keys(updateBracket)) {
+            if ((k.includes("FINAL FOUR") || k.includes("CHAMPIONSHIP")) && updateBracket[k].includes(removedTeam)) {
+              delete updateBracket[k];
+            }
+          }
+        }
+    
+        return updateBracket;
+      });
     }
 
     return (
@@ -112,7 +150,10 @@ const CustomSeed = ({
   }
 };
 
-export default function Bracket({ bracket, liveBracket }: BracketProps) {
+const Bracket = forwardRef(function Bracket(
+  { bracket, liveBracket, onChange, initialSelection }: BracketProps,
+  ref
+) {
   const [selectedRegion, setSelectedRegion] = useState<Region>("EAST");
 
   const [selectedTeams, setSelectedTeams] = useState<Record<string, string>>({});
@@ -147,14 +188,27 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
     },
   ]);
 
+  // updates that bracket state has changed to save correct data
+  useEffect(() => {
+    if (onChange) onChange(selectedTeams);
+  }, [selectedTeams]);
+
+  // what renders all saved button picks
+  useEffect(() => {
+    if (initialSelection && Object.keys(initialSelection).length > 0) {
+      setSelectedTeams(initialSelection);
+    }
+  }, [initialSelection]);
+
   // updates everytime reigon changes
   useEffect(() => {
     // tests to make sure code doesn't crash or overwrite
     if (!bracket?.regions?.[selectedRegion]) return;
+    if (!bracket.regions[selectedRegion].rounds?.[0]) return;
     if (selectedRegion === "FINAL FOUR") return;
 
     // uses the bracket reigons to build the baseSeeds for rnd 64
-    const baseSeeds = bracket.regions[selectedRegion];
+    const baseSeeds = bracket.regions[selectedRegion].rounds[0].seeds;
 
     const newRounds: Round[] = [
       {
@@ -238,8 +292,6 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
   
     setFinalFourRounds(updatedFinalFour);
   }, [selectedTeams]);
-  
-  
 
   /*function genSeeds(numberOfTeams: number): SeedType[] {
     const seeds = Array.from({ length: numberOfTeams }, (_, index) => ({
@@ -284,6 +336,118 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
     );
   }
 
+  
+
+  console.log("selected Teams", selectedTeams, "parsed data", parseSelectedTeamData(selectedTeams));
+  /**
+   * This is how we propogate it up to save button
+   */
+  useImperativeHandle(ref, () => ({
+    getParsedBracketData: () => parseSelectedTeamData(selectedTeams),
+  }));
+
+  // parsed for scoring (only saves winner) - JACK'S LOGIC
+  function parseSelectedTeamData(selectedTeams: Record<string, string>) {
+    // Ensure the full bracket has been picked.
+    if (Object.keys(selectedTeams).length !== 63) {
+      return undefined;
+    }
+    
+    // Create the skeleton of the bracket based on the expected structure.
+    const parsedBracket = {
+      // Use the bracket id and title from the current bracket state (assuming available globally)
+      id: bracket.id, // assuming "bracket" object exists in this context
+      title: bracket.title,
+      regions: {
+        EAST: {
+          rounds: [
+            { title: "First Round", seeds: [] },
+            { title: "Second Round", seeds: [] },
+            { title: "Sweet 16", seeds: [] },
+            { title: "Elite 8", seeds: [] }
+          ]
+        },
+        MIDWEST: {
+          rounds: [
+            { title: "First Round", seeds: [] },
+            { title: "Second Round", seeds: [] },
+            { title: "Sweet 16", seeds: [] },
+            { title: "Elite 8", seeds: [] }
+          ]
+        },
+        SOUTH: {
+          rounds: [
+            { title: "First Round", seeds: [] },
+            { title: "Second Round", seeds: [] },
+            { title: "Sweet 16", seeds: [] },
+            { title: "Elite 8", seeds: [] }
+          ]
+        },
+        WEST: {
+          rounds: [
+            { title: "First Round", seeds: [] },
+            { title: "Second Round", seeds: [] },
+            { title: "Sweet 16", seeds: [] },
+            { title: "Elite 8", seeds: [] }
+          ]
+        },
+        FINAL_FOUR: {
+          rounds: [
+            { title: "Final Four", seeds: [] },
+            { title: "National Championship", seeds: [] },
+          ]
+        }
+      }
+    };
+  
+    // Process each key from selectedTeams.
+    Object.keys(selectedTeams).forEach((key) => {
+      // The key format is "roundIndex-seedIndex-REGION".
+      // For regions like FINAL FOUR, key may contain a space so we need to standardize it.
+      const parts = key.split("-");
+      if (parts.length < 3) return; // skip if invalid
+  
+      const roundIndexStr = parts[0];
+      const _seedIndex = parts[1];
+      // Join remaining parts in case region has hyphens or spaces.
+      const regionRaw = parts.slice(2).join("-").trim();
+      // Map "FINAL FOUR" to "FINAL_FOUR" (you can extend this mapping if needed).
+      const regionKey = regionRaw === "FINAL FOUR" ? "FINAL_FOUR" : regionRaw;
+      const roundIndex = parseInt(roundIndexStr, 10);
+  
+      // The value format is "teamSeed_Team Name-gameId-teamPosition"
+      // Example: "1_Duke Blue Devils-1-0"
+      const value = selectedTeams[key];
+      const valueParts = value.split("-");
+      if (valueParts.length < 3) return; // skip if not valid
+    
+      // Extract team seed and team name from the first part.
+      const [teamSeed, ...teamNameParts] = valueParts[0].split("_");
+      const teamName = teamNameParts.join("_").trim();
+      const gameId = parseInt(valueParts[1], 10);
+      // teamPosition is available as valueParts[2] if needed.
+      
+      // Create a seed object with the winner set.
+      const seedObj = {
+        id: gameId, // or use a composite key if needed
+        winner: teamName,
+        teams: [{ name: teamName, seed: teamSeed }]
+      };
+  
+      // Push this seed object into the proper region and round.
+      if (
+        parsedBracket.regions[regionKey] &&
+        parsedBracket.regions[regionKey].rounds[roundIndex]
+      ) {
+        parsedBracket.regions[regionKey].rounds[roundIndex].seeds.push(seedObj);
+      }
+    });
+  
+    return parsedBracket;
+  }
+  
+  
+
   return (
     <div>
       <p> {bracket.title} </p>
@@ -307,4 +471,7 @@ export default function Bracket({ bracket, liveBracket }: BracketProps) {
       )}
     </div>
   );
-}
+})
+
+export default Bracket;
+
