@@ -167,6 +167,8 @@ const Chatbot = () => {
             //         });
             _updateLastMessage("Handle this case later");
         }
+      } else {
+        _updateLastMessage("Use the GPT fallback");
       }
     })
     .catch(error => {
