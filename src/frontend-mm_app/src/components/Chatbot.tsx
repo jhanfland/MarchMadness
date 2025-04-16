@@ -14,7 +14,7 @@ interface ChatMessage {
  * It allows users to interact with a chatbot to navigate the app, get help with account management,
  * and access tournament information.
  * 
- * @returns {JSX.Element} The rendered Chatbot component
+ * @returns The rendered Chatbot component
  */
 const Chatbot = () => {
   const [showChatbot, setChatbot] = useState<boolean>(false);
@@ -30,9 +30,6 @@ const Chatbot = () => {
 
   /**
    * Scrolls the chat box to the bottom when new messages are added
-   * 
-   * @effect
-   * @dependencies chatHistory
    */
   useEffect(() => {
     if (chatBoxRef.current) {
@@ -43,7 +40,7 @@ const Chatbot = () => {
   /**
    * Updates the last message in the chat history with new content
    * 
-   * @param {React.ReactNode} newMessage - The new message content to display
+   * @param newMessage - The new message content to display
    */
   const _updateLastMessage = (newMessage: React.ReactNode): void => {
     setChatHistory((prevHistory) => {
@@ -62,7 +59,7 @@ const Chatbot = () => {
   /**
    * Handles changes to the input field, updating the chatInput state
    * 
-   * @param {React.ChangeEvent<HTMLTextAreaElement>} event - The change event from the textarea
+   * @param event - The change event from the textarea
    */
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>): void => {
     setChatInput(event.target.value);
@@ -72,7 +69,7 @@ const Chatbot = () => {
    * Handles keyboard events in the input field
    * Submits the message when Enter is pressed (without Shift)
    * 
-   * @param {React.KeyboardEvent<HTMLTextAreaElement>} event - The keyboard event
+   * @param event - The keyboard event
    */
   const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>): void => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -107,7 +104,7 @@ const Chatbot = () => {
    * Makes an API call to Wit.ai to process the user's message
    * and determine the appropriate response based on detected intents
    * 
-   * @param {string} message - The user's message to process
+   * @param message - The user's message to process
    */
   const _aiResponse = (message: string): void => {
     // will need to hide this token. Look into using .env file in root repo, transfer through docker-compose.yml
