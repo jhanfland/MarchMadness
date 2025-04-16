@@ -30,6 +30,7 @@
   border-radius: 10px;
 }
 
+/*CSS for Live Scores Page Buttons*/
 .live-scores-button {
   padding-left: 10px;
   padding-right: 10px;
@@ -43,14 +44,25 @@
   background-color: var(--primary-color);
 }
 
-.score-box {
+.scores-box-container {
   margin: auto;
   text-align: center;
-  width: 50%;
+  width: 95%;
   background-color: var(--live-scores-button-color);
   color: white; 
+  
+  margin-top: 30px; 
+  border-radius: 10px;
+}
+
+.score-box {
+  margin: auto;
+  margin-bottom: 10px;
+  text-align: center;
+  width: 50%;
+  background-color: #1a1b1e;
+  color: white; 
   padding: 10px 24px;
-  cursor: pointer; 
   border-radius: 5px;
 }
 

@@ -1,17 +1,42 @@
 import ButtonBar from "@/components/ui/buttonbar";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
-import grab_live_bracket_info from "./Bracket/LiveBracketPage";
+import { useEffect, useState } from "react";
 import logo from "./../images/logo.png";
 
 export function LiveScoresPage() {
         
-    var march_maddness_data = grab_live_bracket_info();
-    useEffect(() => {march_maddness_data}, []);
-    console.log(march_maddness_data.toDateString)
+    // useEffect(() => {march_maddness_data}, []);
 
-    const umm = async () => {
+    // const [items, setItems] = useState([]);
+
+    // useEffect(() => {
+    //     function grab_live_bracket_info() {
+    //       fetch("http://localhost:8000/get_bracket", {
+    //         method: "GET",
+    //       })
+    //         .then((response) => {
+    //             if (!response.ok) {
+    //             throw new Error("Failed to fetch brackets");
+    //             }
+    //             return response.json();
+    //         });
+    //     }
+    // grab_live_bracket_info();
+    // }, []);
+
+    // var march_maddness_data = grab_live_bracket_info();
+
+    function changeScores(buttonName){
+        document.getElementById("title").innerHTML = buttonName;
         
+        const newBox = document.createElement("div");
+        const newBox2 = document.createElement("div");
+
+        newBox.className = "score-box";
+        newBox2.className =  "score-box";
+
+        document.getElementById("boxes").appendChild(newBox);
+        document.getElementById("boxes").appendChild(newBox2);
 
     }
 
@@ -26,7 +51,8 @@ export function LiveScoresPage() {
         <div>
             <ButtonBar>
                 { buttons.map((buttonIndex) =>  
-                <Button button={buttonIndex} className="live-scores-button">
+                <Button button={buttonIndex} className="live-scores-button" 
+                        onClick={() => changeScores(buttonIndex.name)}>
                     <div>
                         <p className="whitespace-pre-line">
                             {buttonIndex.name}
@@ -39,6 +65,12 @@ export function LiveScoresPage() {
             ) }
 
             </ButtonBar>
+                <div className="scores-box-container">
+                    <p id="title">{buttons[0].name}</p>
+                    <div className="columns-2" id="boxes">
+                        
+                    </div>
+                </div>
         </div>
     );
 }
