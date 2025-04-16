@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8'
 
 services:
   db:
@@ -19,6 +19,8 @@ services:
     build:
       context: ./src/backend
     restart: always
+    env_file:
+      - .env
     environment:
       FLASK_ENV: development
       SECRET_KEY: "your_secret_key"
@@ -36,12 +38,18 @@ services:
     restart: always
     environment:
       VITE_BACKEND_URL: http://backend:8000
+      CHOKIDAR_USEPOLLING: "true" # Force polling for file changes
     depends_on:
       - backend
     ports:
-      - "3000:5173"
+      - "3000:5173" # Ensure the correct Vite port is mapped
+    volumes:
+      - ./src/frontend-mm_app:/app # Mount source code for live updates
+      - /app/node_modules # Prevent overwriting node_modules
     container_name: frontendReact
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
 # Ensure this section exists to define the named volume
 volumes:
   mysql_data:
+

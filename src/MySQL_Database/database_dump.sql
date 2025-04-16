@@ -102,6 +102,33 @@ LOCK TABLES `users` WRITE;
 INSERT INTO `users` VALUES (1,'user1@example.com','hashedpassword1',100),(2,'user2@example.com','hashedpassword2',50);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table 'bracket'
+-- 
+
+DROP TABLE IF EXISTS `bracket`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bracket` (
+  `id` INT NOT NULL,
+  `bracket_number` INT NOT NULL,
+  `bracket_selection` JSON NOT NULL,
+  PRIMARY KEY (`id`, `bracket_number`),
+  FOREIGN KEY (`id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `bracket`
+--
+
+LOCK TABLES `bracket` WRITE;
+/*!40000 ALTER TABLE `bracket` DISABLE KEYS */;
+INSERT INTO `bracket` VALUES (1, 1, '{"round1": "TeamA"}');
+/*!40000 ALTER TABLE `bracket` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

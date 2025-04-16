@@ -1,26 +1,30 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { LoginForm } from '../Login-Form';
-import { describe, it, expect } from 'vitest';
+import { render, screen, fireEvent } from "@testing-library/react";
+import { LoginForm } from "../../Pages/Login-Form";
+import { describe, it, expect } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 
 // Test for Login form
-describe('LoginForm Component', () => {
-
+describe("LoginForm Component", () => {
   // Test surrounding form element
-  it('renders Login form and ensures functionality', () => {
-    render(<LoginForm />);
+  it("renders Login form and ensures functionality", () => {
+    render(
+      <MemoryRouter >
+        <LoginForm />
+      </MemoryRouter>
+    );
 
     // Check if the form elements are rendered.
     const emailInput = screen.getByLabelText("Email");
     const passwordInput = screen.getByLabelText("Password");
-    const submitButton = screen.getByRole('button');
+    const submitButton = screen.getByRole("button");
 
     // Simulate user input and form submission
-    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+    fireEvent.change(emailInput, { target: { value: "test@example.com" } });
+    fireEvent.change(passwordInput, { target: { value: "password123" } });
     fireEvent.click(submitButton);
 
     // Check that inputs have the correct values
-    expect(emailInput).toHaveValue('test@example.com');
-    expect(passwordInput).toHaveValue('password123');
+    expect(emailInput).toHaveValue("test@example.com");
+    expect(passwordInput).toHaveValue("password123");
   });
 });

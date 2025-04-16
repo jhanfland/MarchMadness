@@ -8,6 +8,8 @@ Tailwind CSS: A utility-first CSS framework for creating custom designs.
 ShadCN: A library of high-quality UI components for React.
 Vitest: Testing framework
 
+https://codesandbox.io/p/sandbox/brackets-forked-zwz7k3?file=%2Fsrc%2FApp.js%3A105%2C8
+
 # Commands
 
 to run application: npm run dev

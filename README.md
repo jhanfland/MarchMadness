@@ -57,4 +57,16 @@ This week we completed the sign in page, and also the user authentication and no
 Our plan for next week is to start implimenting the API calls and information into the database and complete the homepage and bar to choose which page you are on for the frontend 
 
 ## Sprint 2, Week 1 (March 4 - March 11) - Progress Report
-To be continued ... 
+Going into sprint 2, our team was able to clear out a majority of the issues from sprint 1, leaving the "update STYLEmd" as the only remaining issue that is left open from sprint 1. This week we were able to implement the website homepage, which has a user-friendly interface and closely followed our Figma design. 
+
+Our plan for next week is to create a frontend skeleton for our bracket and have it work with the backend API call. Additionally we want to set up our production container and create a CI/CD pipeline, while continuing to update documentation as needed. 
+
+## Sprint 2, Week 2 (March 11 - March 18) - Progress Report
+This week we were able to complete the bracket skeleton, and we created our backend bracket functionality with the proper API calls. We also restructued some of the website functionality, and updated our dev container so that it would dynamically update our website when we made changes in frontend. 
+
+Ideally, our plan for next week is to have a functioning bracket that has all the march madness teams and all their respective information (seeding, matchup, region, game start, etc). This will require some additional work in both our frontend, backend, and testing.
+
+## Sprint 2, Week 3 (March 18 - April 2) - Progress Report
+Over the past two weeks (including spring break), our group successfully implemented the user team selection functionality and the logic to auto-populate the later rounds with previously selected winners. This basically completed the bulk of our march madness website features. We also added a "live bracket" page, giving users a dynamic view of the ongoing March Madness bracket. With these two major components complete, we’ve successfully met our Sprint 2 objectives and remain well on track to hit our end-of-year goals. 
+
+Our plans for the upcoming weeks are to continue developing some missing features. These include adding respective information to teams (seeding, game start, etc), developing a save bracket option, incorporating a user scoring system, minor UI updates, among others. 
