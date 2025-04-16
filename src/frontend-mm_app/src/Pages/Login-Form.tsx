@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormEvent, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "@/components/navbar";
+import Lottie from "lottie-react";
+import errorAnimation from "../../public/errorAnimation.json"
 
 export function LoginForm() {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -14,6 +15,7 @@ export function LoginForm() {
 
   // State for toggling password visibility
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string>("");
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -39,7 +41,7 @@ export function LoginForm() {
       navigate("/");
     } catch (error: any) {
       console.error("Login failed:", error);
-      alert(error.message);
+      setError("Login Failed")
     }
   };
 
@@ -98,9 +100,20 @@ export function LoginForm() {
         <Label htmlFor="showPass" className="w-max"> Show Password </Label>
       </div>
 
+      
+
       <Button type="submit" className="w-full">
         Log In
       </Button>
+
+      {error ? <div className="text-red-500 flex gap-3 align-center">
+        <Lottie
+            animationData={errorAnimation}
+            loop={false}
+            className="w-[30px]"
+          />
+         <p className="mt-0.5"> {error} </p> 
+         </div> : <></>}
     </div>
   );
 
