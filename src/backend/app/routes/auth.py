@@ -25,7 +25,9 @@ def register():
     hashed_password = generate_password_hash(data['password'])
 
     # new user now with hashed password
-    new_user = User(email=data['email'], password=hashed_password, balance=data.get('balance', 0))
+    new_user = User(
+        email=data['email'], password=hashed_password, balance=data.get('balance', 0)
+    )
 
     # Add new user to database
     db.session.add(new_user)
@@ -46,9 +48,11 @@ def login():
     email = data.get('email')
     password = data.get('password')
 
-    user = User.query.filter_by(email=email).first()    # Find user email in database
+    user = User.query.filter_by(email=email).first()  # Find user email in database
 
-    if not user or not check_password_hash(user.password, password):  # Direct password comparison (now hashed)
+    if not user or not check_password_hash(
+        user.password, password
+    ):  # Direct password comparison (now hashed)
         return jsonify({'error': 'Invalid email or password.'}), 401
 
     # Store user ID in session for auth

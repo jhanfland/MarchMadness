@@ -10,6 +10,7 @@ ROUND_POINTS = {
     "National Championship": 320,
 }
 
+
 def extract_game_number(game):
     """
     Attempt to extract a game number from the game 'title'
@@ -34,6 +35,7 @@ def extract_game_number(game):
             pass
     return 0
 
+
 def determine_winner(game):
     """
     Determines the winner of the game.
@@ -46,21 +48,22 @@ def determine_winner(game):
         return home if home_pts > away_pts else away
     return None
 
+
 def parse_live_winners(live_bracket):
     """
     Parses the live bracket JSON to extract winners in a structure that mirrors the user bracket.
     Instead of relying on hardcoded region mappings, we use the "bracket" information embedded in the
     live bracket's "bracketed" array.
-    
+
     The expected live bracket structure:
       - Rounds 1-4: Each round contains a "bracketed" array of regions.
           Each region object should contain a "bracket" dict with a "name" attribute
           (for example, "South Regional").
       - Rounds 5 and 6 (Final Four and Championship): Read directly from the "games" list.
-    
+
     Returns a dictionary:
       winners[region_key][round_index] = [winner, winner, ...]
-    
+
     The region_key is derived by removing the " Regional" suffix (if present)
     and then uppercasing it to align with user bracket keys (i.e. "SOUTH", "MIDWEST", "EAST", "WEST").
     """
@@ -71,7 +74,7 @@ def parse_live_winners(live_bracket):
         "MIDWEST": [[] for _ in range(4)],
         "EAST": [[] for _ in range(4)],
         "WEST": [[] for _ in range(4)],
-        "FINAL_FOUR": [[] for _ in range(2)]
+        "FINAL_FOUR": [[] for _ in range(2)],
     }
 
     # Process rounds 1 to 4 (typically First Round, Second Round, Sweet 16, Elite 8)
@@ -97,19 +100,23 @@ def parse_live_winners(live_bracket):
     final_four_games_sorted = sorted(final_four_games, key=extract_game_number)
     # If exactly two games are found, swap the order to match the expected ordering.
     if len(final_four_games_sorted) == 2:
-         final_four_games_sorted = [final_four_games_sorted[1], final_four_games_sorted[0]]
+        final_four_games_sorted = [
+            final_four_games_sorted[1],
+            final_four_games_sorted[0],
+        ]
     for game in final_four_games_sorted:
-         winner = determine_winner(game)
-         winners["FINAL_FOUR"][0].append(winner)
+        winner = determine_winner(game)
+        winners["FINAL_FOUR"][0].append(winner)
 
     # Process Round 6: National Championship – again, not divided by region.
     championship_games = rounds[6].get("games", [])
     championship_games_sorted = sorted(championship_games, key=extract_game_number)
     for game in championship_games_sorted:
-         winner = determine_winner(game)
-         winners["FINAL_FOUR"][1].append(winner)
+        winner = determine_winner(game)
+        winners["FINAL_FOUR"][1].append(winner)
 
     return winners
+
 
 def score_bracket(user_bracket, live_bracket):
     """
@@ -132,8 +139,17 @@ def score_bracket(user_bracket, live_bracket):
                 user_winner = seed.get("winner")
                 try:
                     live_winner = live_winners[region][round_index][game_index]
-                    print("Region:", region, "Round:", round_title, 
-                          "User winner:", user_winner, "Live winner:", live_winner, flush=True)
+                    print(
+                        "Region:",
+                        region,
+                        "Round:",
+                        round_title,
+                        "User winner:",
+                        user_winner,
+                        "Live winner:",
+                        live_winner,
+                        flush=True,
+                    )
                     if user_winner == live_winner:
                         total_score += ROUND_POINTS.get(round_title, 0)
                 except (IndexError, KeyError):

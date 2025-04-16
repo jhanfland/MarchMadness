@@ -12,6 +12,7 @@ from app.scoring import score_bracket
 
 bracket_bp = Blueprint('bracket', __name__)
 
+
 @bracket_bp.route('/score_bracket', methods=['POST'])
 def score_user_bracket():
     # Verify the user.
@@ -23,10 +24,14 @@ def score_user_bracket():
     user_bracket = data.get('user_bracket')
     live_bracket = data.get('live_bracket')
     if not user_bracket or not live_bracket:
-        return jsonify({'error': 'Both user_bracket and live_bracket are required'}), 400
+        return (
+            jsonify({'error': 'Both user_bracket and live_bracket are required'}),
+            400,
+        )
     # Calculate the score by comparing the user bracket with the live bracket.
     score = score_bracket(user_bracket, live_bracket)
     return jsonify({'score': score}), 200
+
 
 # Returns live bracket from API
 @bracket_bp.route('/get_bracket', methods=['GET'])
@@ -73,9 +78,15 @@ def generate_bracket_template():
                 "id": game_index + 1,
                 "date": game.get("scheduled", ""),
                 "teams": [
-                    { "name": game.get("home", {}).get("name", "TBD"), "seed": game.get("home", {}).get("seed")},
-                    { "name": game.get("away", {}).get("name", "TBD"), "seed": game.get("away", {}).get("seed")}
-                ]
+                    {
+                        "name": game.get("home", {}).get("name", "TBD"),
+                        "seed": game.get("home", {}).get("seed"),
+                    },
+                    {
+                        "name": game.get("away", {}).get("name", "TBD"),
+                        "seed": game.get("away", {}).get("seed"),
+                    },
+                ],
             }
             region_seeds[region_name].append(seed)
 
@@ -88,17 +99,21 @@ def generate_bracket_template():
 
     return jsonify(bracket), 200
 
+
 @bracket_bp.route('/get_user_bracket_id', methods=['GET'])
 def get_bracket_id():
     user, mes, errNum = verify_user()
-    if (user == None):
+    if user == None:
         return mes, errNum
-    max_bracket = db.session.query(func.max(Bracket.bracket_number))\
-                            .filter_by(id=user.id)\
-                            .scalar()
+    max_bracket = (
+        db.session.query(func.max(Bracket.bracket_number))
+        .filter_by(id=user.id)
+        .scalar()
+    )
     # If user has no brackets, start from 1
     next_bracket_number = (max_bracket or 0) + 1
     return jsonify({'next_bracket_number': next_bracket_number})
+
 
 @bracket_bp.route('/get_user_bracket_numbers', methods=['GET'])
 def get_user_bracket_numbers():
@@ -116,10 +131,16 @@ def get_user_bracket_numbers():
 
     bracket_numbers = [bn[0] for bn in bracket_numbers]
 
-    return jsonify({
-        'message': 'Bracket numbers retrieved successfully',
-        'bracket_numbers': bracket_numbers
-    }), 200
+    return (
+        jsonify(
+            {
+                'message': 'Bracket numbers retrieved successfully',
+                'bracket_numbers': bracket_numbers,
+            }
+        ),
+        200,
+    )
+
 
 # Returns users bracket that has already been created
 @bracket_bp.route('/get_user_bracket/<int:bracket_number>', methods=['GET'])
