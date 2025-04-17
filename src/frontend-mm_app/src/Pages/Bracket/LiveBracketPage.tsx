@@ -30,6 +30,7 @@ export default function LiveBracketPage() {
                         return gameNumberA - gameNumberB;
                     });
                     region.games.forEach((game : any, idx3: any) => {
+                    console.log("games", game);
                     // grabs team info
                     const awayTeam : Team = {name: game.away.alias, seed: game.away.seed};
                     const homeTeam : Team = {name: game.home.alias, seed: game.home.seed };
@@ -63,7 +64,6 @@ export default function LiveBracketPage() {
         console.log("roundObjArrray", roundObjArray);
         // will need to change id based on which bracket they have created
         const bracketObj: BracketType = {title: data.name , id: 1, rounds: roundObjArray }
-        console.log("live bracket parsing", bracketObj)
         // updated brackets object
         setLiveBracket([bracketObj]);
     };

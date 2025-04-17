@@ -4,14 +4,38 @@ import { useEffect, useState } from "react";
 import logo from "./../images/logo.png";
 
 export function LiveScoresPage() {
+    const [marchMadnessData, mmData] = useState(null);
+
+    function changeScores(buttonName, data){
+        console.log(data)
+        document.getElementById("title").innerHTML = buttonName;
+
+        var container = document.getElementById("boxes");
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+          }
+
+        for (let i = 0; i < 10; i++) {
+            const newBox = document.createElement("div");
+            newBox.className = "score-box";
+            const team = document.createElement("p");
+            const score = document.createElement("p");
+            team.innerHTML = "team";
+            score.innerHTML = "score";
+            newBox.appendChild(team);
+            newBox.appendChild(score);
+            
+            document.getElementById("boxes").appendChild(newBox);
+        } 
         
-    // 
+        // const newBox = document.createElement("div");
+        // const newBox2 = document.createElement("div");
 
-    // useEffect(() => {march_maddness_data}, []);
+        // newBox.className = "score-box";
+        // newBox2.className =  "score-box";
 
-    // const [items, setItems] = useState([]);
-
-    function addDataToButtons(){
+        // document.getElementById("boxes").appendChild(newBox);
+        // document.getElementById("boxes").appendChild(newBox2);
 
     }
 
@@ -20,34 +44,23 @@ export function LiveScoresPage() {
           fetch("http://localhost:8000/get_bracket", {
             method: "GET",
           })
-            .then((response) => {
-                if (!response.ok) {
-                throw new Error("Failed to fetch brackets");
-                }
-                return response.json();
-            })
-            .then((data) => {
-                addDataToButtons(data)
-            });
+          .then((response) => {
+            if (!response.ok) {
+            throw new Error("Failed to get data");
+            }
+            return response.json();
+        })
+        .then((data) => {
+            changeScores(buttons[0].name, data);
+            mmData(data);
+        })
+        .catch((err) => {
+            console.error("Error fetching data:", err);
+        });
+            
         }
     grab_live_bracket_info();
-    }, []);
-
-
-
-    function changeScores(buttonName){
-        document.getElementById("title").innerHTML = buttonName;
-        
-        const newBox = document.createElement("div");
-        const newBox2 = document.createElement("div");
-
-        newBox.className = "score-box";
-        newBox2.className =  "score-box";
-
-        document.getElementById("boxes").appendChild(newBox);
-        document.getElementById("boxes").appendChild(newBox2);
-
-    }
+    }, []);    
 
     // ButtonBar dynamically adjusts itself based on how many dicts are in the 
     // "buttons" variable
@@ -63,7 +76,7 @@ export function LiveScoresPage() {
             <ButtonBar>
                 { buttons.map((buttonIndex) =>  
                 <Button button={buttonIndex} className="live-scores-button" 
-                        onClick={() => changeScores(buttonIndex.name)}>
+                        onClick={() => changeScores(buttonIndex.name, marchMadnessData)}>
                     <div>
                         <p className="whitespace-pre-line">
                             {buttonIndex.name}
@@ -77,10 +90,8 @@ export function LiveScoresPage() {
 
             </ButtonBar>
                 <div className="scores-box-container">
-                    <p id="title">{buttons[0].name}</p>
-                    <div className="columns-2" id="boxes">
-                        
-                    </div>
+                    <p id="title"></p>
+                    <div className="columns-2" id="boxes"></div>
                 </div>
         </div>
     );
