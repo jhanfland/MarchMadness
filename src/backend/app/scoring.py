@@ -51,9 +51,9 @@ def determine_winner(game):
 
 def parse_live_winners(live_bracket):
     """
-    Parses the live bracket JSON to extract winners in a structure that mirrors the user bracket.
-    Instead of relying on hardcoded region mappings, we use the "bracket" information embedded in the
-    live bracket's "bracketed" array.
+    Parses the live bracket JSON to extract winners in a structure that mirrors the user
+    bracket. Instead of relying on hardcoded region mappings, we use the "bracket"
+    information embedded in the live bracket's "bracketed" array.
 
     The expected live bracket structure:
       - Rounds 1-4: Each round contains a "bracketed" array of regions.
@@ -65,7 +65,8 @@ def parse_live_winners(live_bracket):
       winners[region_key][round_index] = [winner, winner, ...]
 
     The region_key is derived by removing the " Regional" suffix (if present)
-    and then uppercasing it to align with user bracket keys (i.e. "SOUTH", "MIDWEST", "EAST", "WEST").
+    and then uppercasing it to align with user bracket keys
+    (i.e. "SOUTH", "MIDWEST", "EAST", "WEST").
     """
     rounds = live_bracket["rounds"]
     # Initialize winners dictionary for each region and the Final Four.
@@ -122,7 +123,8 @@ def score_bracket(user_bracket, live_bracket):
     """
     Scores the user bracket against the live bracket.
     The user bracket is assumed to have proper ordering per region, including FINAL_FOUR.
-    This function uses the winners extracted from the live bracket to compare against the user selections.
+    This function uses the winners extracted from the live bracket to compare against
+    the user selections.
     """
     live_winners = parse_live_winners(live_bracket)
     print("live bracket winners:", live_winners, flush=True)
