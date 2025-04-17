@@ -8,12 +8,17 @@ export function LiveScoresPage() {
 
     function changeScores(buttonName, data){
         console.log(data)
+        // Changes name of button container (stored in element "title") with button name
         document.getElementById("title").innerHTML = buttonName;
 
+        // Clears the children of the boxes container after every button press and
+        // and when the page refreshes
         var container = document.getElementById("boxes");
         while (container.firstChild) {
             container.removeChild(container.firstChild);
           }
+
+          
 
         for (let i = 0; i < 10; i++) {
             const newBox = document.createElement("div");
@@ -39,8 +44,9 @@ export function LiveScoresPage() {
 
     }
 
+    // Data Fetch method that runs when the page is refreshed 
     useEffect(() => {
-        function grab_live_bracket_info() {
+        function grab_bracket_data() {
           fetch("http://localhost:8000/get_bracket", {
             method: "GET",
           })
@@ -59,7 +65,7 @@ export function LiveScoresPage() {
         });
             
         }
-    grab_live_bracket_info();
+        grab_bracket_data();
     }, []);    
 
     // ButtonBar dynamically adjusts itself based on how many dicts are in the 
