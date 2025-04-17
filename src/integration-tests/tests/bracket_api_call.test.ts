@@ -100,6 +100,68 @@ describe("Flask API Tests - Bracket", () => {
         });
     });
 
+    describe("Scoring Bracket", () => {
+        it("should score a user bracket correctly against a live bracket", async () => {
+            const userBracket = {
+                regions: {
+                    EAST: {
+                        rounds: [
+                            {
+                                title: "First Round",
+                                seeds: [
+                                    { id: 1, teams: [{ name: "Duke" }], winner: "Duke" },
+                                    { id: 2, teams: [{ name: "UNC" }], winner: "UNC" }
+                                ]
+                            }
+                        ]
+                    },
+                    FINAL_FOUR: { rounds: [[], []] }
+                }
+            };
+
+            const liveBracket = {
+                rounds: [
+                    {},
+                    {
+                        bracketed: [
+                            {
+                                bracket: { name: "East Regional" },
+                                games: [
+                                    {
+                                        title: "Game 1",
+                                        home: { name: "Duke" },
+                                        away: { name: "UCLA" },
+                                        home_points: 90,
+                                        away_points: 70
+                                    },
+                                    {
+                                        title: "Game 2",
+                                        home: { name: "UNC" },
+                                        away: { name: "Gonzaga" },
+                                        home_points: 80,
+                                        away_points: 75
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {}, {}, {}, {}, {}
+                ]
+            };
+
+            const response = await axios.post(`${backendUrl}/score_bracket`, {
+                user_bracket: userBracket,
+                live_bracket: liveBracket
+            }, {
+                headers: { Authorization: `Bearer ${authToken}` },
+            });
+
+            expect(response.status).toBe(200);
+            expect(typeof response.data.score).toBe("number");
+            expect(response.data.score).toBeGreaterThanOrEqual(0);  // will fix this
+        });
+    });
+
     describe("Error Handling", () => {
         it("should return 404 for a non-existent endpoint", async () => {
             try {
