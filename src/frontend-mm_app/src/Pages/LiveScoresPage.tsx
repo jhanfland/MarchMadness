@@ -11,22 +11,29 @@ export function LiveScoresPage() {
 
     // const [items, setItems] = useState([]);
 
-    // useEffect(() => {
-    //     function grab_live_bracket_info() {
-    //       fetch("http://localhost:8000/get_bracket", {
-    //         method: "GET",
-    //       })
-    //         .then((response) => {
-    //             if (!response.ok) {
-    //             throw new Error("Failed to fetch brackets");
-    //             }
-    //             return response.json();
-    //         });
-    //     }
-    // grab_live_bracket_info();
-    // }, []);
+    function addDataToButtons(){
 
-    // var march_maddness_data = grab_live_bracket_info();
+    }
+
+    useEffect(() => {
+        function grab_live_bracket_info() {
+          fetch("http://localhost:8000/get_bracket", {
+            method: "GET",
+          })
+            .then((response) => {
+                if (!response.ok) {
+                throw new Error("Failed to fetch brackets");
+                }
+                return response.json();
+            })
+            .then((data) => {
+                addDataToButtons(data)
+            });
+        }
+    grab_live_bracket_info();
+    }, []);
+
+
 
     function changeScores(buttonName){
         document.getElementById("title").innerHTML = buttonName;
