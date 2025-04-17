@@ -5,7 +5,7 @@ export type Team = {
   };
   
   export type Seed = {
-    id: number,
+    id?: number,
     date?: string,
     teams: Team[],
     region?: Region,

@@ -1,7 +1,8 @@
-import dunkingImg from "/basketball.jpg";
+import Slider from "@/components/ui/Hero-Slider";
 import { Link } from "react-router-dom";
 
 export default function Homepage() {
+  const isLoggedIn = localStorage.getItem("token");
 
   return (
     <div className="relative min-h-[87vh]">
@@ -13,6 +14,7 @@ export default function Homepage() {
           opacity: 0.1,
         }}
       ></div>
+
       <div className="relative flex items-center justify-center min-h-[80vh]">
         <div className="flex gap-8">
           <div className="flex flex-col gap-2 mr-9">
@@ -26,19 +28,16 @@ export default function Homepage() {
               Best March Madness platform out with live <br /> scores and
               comprehensive betting <br /> information
             </p>
+
             <Link
-              to="/signup"
+              to={isLoggedIn ? "/bracket" : "/signup"}
               className="bg-[var(--primary-color)] py-3 px-9 rounded-md font-extrabold text-lg my-4 w-max hover:bg-blue-900 hover:text-white"
             >
-              SIGN UP NOW
+              {isLoggedIn ? "CREATE BRACKET NOW" : "SIGN UP NOW"}
             </Link>
           </div>
 
-          <img
-            src={dunkingImg}
-            width="800px"
-            alt="Dunking Basketball"
-          />
+          <Slider className="relative top-0 left-0 w-[800px] "/>
         </div>
       </div>
     </div>

@@ -5,8 +5,27 @@ from app.models.user import User
 import datetime
 import requests
 from flask import current_app as app
+from sqlalchemy import func
+from app.scoring import score_bracket
+
 
 bracket_bp = Blueprint('bracket', __name__)
+
+@bracket_bp.route('/score_bracket', methods=['POST'])
+def score_user_bracket():
+    # Verify the user.
+    user, mes, errNum = verify_user()
+    if not user:
+        return mes, errNum
+
+    data = request.get_json()
+    user_bracket = data.get('user_bracket')
+    live_bracket = data.get('live_bracket')
+    if not user_bracket or not live_bracket:
+        return jsonify({'error': 'Both user_bracket and live_bracket are required'}), 400
+    # Calculate the score by comparing the user bracket with the live bracket.
+    score = score_bracket(user_bracket, live_bracket)
+    return jsonify({'score': score}), 200
 
 # Returns live bracket from API
 @bracket_bp.route('/get_bracket', methods=['GET'])
@@ -67,7 +86,38 @@ def generate_bracket_template():
 
     return jsonify(bracket), 200
 
+@bracket_bp.route('/get_user_bracket_id', methods=['GET'])
+def get_bracket_id():
+    user, mes, errNum = verify_user()
+    if (user == None):
+        return mes, errNum
+    max_bracket = db.session.query(func.max(Bracket.bracket_number))\
+                            .filter_by(id=user.id)\
+                            .scalar()
+    # If user has no brackets, start from 1
+    next_bracket_number = (max_bracket or 0) + 1
+    return jsonify({'next_bracket_number': next_bracket_number})
 
+@bracket_bp.route('/get_user_bracket_numbers', methods=['GET'])
+def get_user_bracket_numbers():
+    user, mes, errNum = verify_user()
+    if user is None:
+        return mes, errNum
+
+    # all bracket_numbers (# of brackets) for the user
+    bracket_numbers = (
+        db.session.query(Bracket.bracket_number)
+        .filter_by(id=user.id)
+        .order_by(Bracket.bracket_number.asc())
+        .all()
+    )
+
+    bracket_numbers = [bn[0] for bn in bracket_numbers]
+
+    return jsonify({
+        'message': 'Bracket numbers retrieved successfully',
+        'bracket_numbers': bracket_numbers
+    }), 200
 
 # Returns users bracket that has already been created
 @bracket_bp.route('/get_user_bracket/<int:bracket_number>', methods=['GET'])
