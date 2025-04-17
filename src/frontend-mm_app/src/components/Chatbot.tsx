@@ -107,16 +107,8 @@ const Chatbot = () => {
    * @param message - The user's message to process
    */
   const _aiResponse = (message: string): void => {
-    // will need to hide this token. Look into using .env file in root repo, transfer through docker-compose.yml
-    const witAiToken = 'REMOVED_SECRET';
-    
     // Make Wit.ai API call
-    fetch(`https://api.wit.ai/message?v=20240304&q=${encodeURIComponent(message)}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${witAiToken}`
-      }
-    })
+    fetch(`/api/witai?message=${encodeURIComponent(message)}`)
     .then(response => response.json())
     .then(data => {
       console.log('Wit.ai response:', data);
@@ -127,7 +119,7 @@ const Chatbot = () => {
         // Process the intent and provide appropriate response 
         switch (intent) {
           case 'app_features':
-            _updateLastMessage("FILL IN");
+            _updateLastMessage("I can help you fill out your bracket, check scores, and more!");
             break;
           case 'future_features':
             _updateLastMessage("FILL IN");
