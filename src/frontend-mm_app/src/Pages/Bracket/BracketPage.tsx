@@ -245,6 +245,38 @@ export default function BracketPage({
     }
   };
 
+  const deleteBracket = async (bracket: BracketType) => {
+    const token = localStorage.getItem("token");
+
+    //Call backend
+
+    fetch(`${BACKEND_URL}/delete_user_bracket`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        bracket_number: bracket.id,
+      }),
+    })
+      .then((r) => {
+        if (r.status == 200) {
+          return r.json();
+        } else {
+          throw new Error("Error with deletion");
+        }
+      })
+      .then((data) => {
+        console.log("Deleted bracket #", bracket.id, "on the backend");
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+
+    setBrackets((prev) => prev.filter((b) => b.id != bracket.id));
+  };
+
   const saveBracket = async (bracket_number: number) => {
     const token = localStorage.getItem("token");
 
@@ -344,12 +376,18 @@ export default function BracketPage({
                       }))
                     }
                   />
-                  <div className="absolute bottom-2 right-2">
+                  <div className="absolute bottom-2 right-2 flex gap-2">
+                    <Button
+                      onClick={() => deleteBracket(bracket)}
+                      className="bg-[var(--primary-color)] font-bold hover:bg-blue-900"
+                    >
+                      DELETE
+                    </Button>
                     <Button
                       onClick={() => saveBracket(bracket.id)}
                       className="bg-[var(--primary-color)] font-bold hover:bg-blue-900"
                     >
-                      SAVE BRACKET
+                      SAVE
                     </Button>
                   </div>
                 </div>
