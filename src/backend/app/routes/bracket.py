@@ -215,7 +215,7 @@ def create_user_bracket():
 
 
 # Delete user bracket
-@bracket_bp.route("/delete_user_bracket", methods=["DELETE:"])
+@bracket_bp.route("/delete_user_bracket", methods=["POST"])
 def delete_user_bracket():
     # User Verification
     user, mes, errNum = verify_user()
@@ -224,10 +224,9 @@ def delete_user_bracket():
     # Get bracket number  and bracket selection
     data = request.get_json()
     bracket_number = data.get("bracket_number")
-    bracket_selection = data.get("bracket_selection")
-    if not bracket_number or not bracket_selection:
+    if not bracket_number:
         return (
-            jsonify({"error": "Bracket number and bracket selection are required"}),
+            jsonify({"error": "Bracket number is required"}),
             400,
         )
     # Check if the user already has a bracket for the given bracket_number
@@ -241,9 +240,7 @@ def delete_user_bracket():
         return jsonify({"error": "Bracket not found"}), 404
 
     return (
-        jsonify(
-            {"message": "Bracket deleted successfully", "bracket": bracket_selection}
-        ),
+        jsonify({"message": "Bracket deleted successfully"}),
         200,
     )
 

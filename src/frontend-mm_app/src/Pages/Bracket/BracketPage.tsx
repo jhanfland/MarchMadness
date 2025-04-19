@@ -251,7 +251,7 @@ export default function BracketPage({
     //Call backend
 
     fetch(`${BACKEND_URL}/delete_user_bracket`, {
-      method: "DELETE",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -263,6 +263,8 @@ export default function BracketPage({
       .then((r) => {
         if (r.status == 200) {
           return r.json();
+        } else if (r.status == 404) {
+          throw new Error("Bracket not found on backend");
         } else {
           throw new Error("Error with deletion");
         }

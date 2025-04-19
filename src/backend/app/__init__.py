@@ -20,7 +20,7 @@ def create_app():
     app.config.from_object(Config)
 
     CORS(
-        app
+        app, methods=["POST", "GET", "DELETE"]
     )  ## Allows Cross Origins Resource Sharing ie can recieve requests from different origin than the one it is hosted on
     db.init_app(app)
 

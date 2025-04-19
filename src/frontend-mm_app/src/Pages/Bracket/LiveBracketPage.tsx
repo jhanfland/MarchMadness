@@ -110,7 +110,6 @@ export default function LiveBracketPage() {
         roundObjArray.push(roundObj);
       }
     });
-    console.log("roundObjArrray", roundObjArray);
     // will need to change id based on which bracket they have created
     const bracketObj: BracketType = {
       title: data.name,
