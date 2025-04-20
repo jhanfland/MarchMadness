@@ -63,6 +63,12 @@ export function LiveScoresPage() {
             newBox.appendChild(home);
             newBox.appendChild(away);
 
+            // Adds game status element
+            const game_status = document.createElement("p");
+            game_status.innerHTML = "FINAL";
+            game_status.className = "font-semibold text-[14px] pb-[10px] text-center";
+            newBox.appendChild(game_status);
+
             document.getElementById("boxes").appendChild(newBox);
         }
 
