@@ -9,7 +9,9 @@ export function LiveScoresPage() {
     function changeScores(buttonName, data){
         console.log(data)
         // Changes name of button container (stored in element "title") with button name
-        document.getElementById("title").innerHTML = buttonName;
+        var title = document.getElementById("title");
+        title.innerHTML = buttonName;
+        title.className = "text-[22px] pb-6 pt-5";
 
         // Clears the children of the boxes container after every button press and
         // and when the page refreshes
@@ -18,30 +20,78 @@ export function LiveScoresPage() {
             container.removeChild(container.firstChild);
           }
 
-          
-
-        for (let i = 0; i < 10; i++) {
+        function createNewElements(game){
             const newBox = document.createElement("div");
             newBox.className = "score-box";
-            const team = document.createElement("p");
-            const score = document.createElement("p");
-            team.innerHTML = "team";
-            score.innerHTML = "score";
-            newBox.appendChild(team);
-            newBox.appendChild(score);
-            
+
+            const away = document.createElement("div");
+            const home = document.createElement("div");
+
+            const name_away = document.createElement("p");
+            const name_home = document.createElement("p");
+            const score_away = document.createElement("p");
+            const score_home = document.createElement("p");
+
+            name_away.innerHTML = game.away.alias;
+            name_home.innerHTML = game.home.alias;
+            score_away.innerHTML = game.away_points;
+            score_home.innerHTML = game.home_points;
+            name_away.className = "mr-auto";
+            name_home.className = "mr-auto";
+
+            const away_square = document.createElement("div");
+            away_square.className = "valid-square";
+            away.appendChild(away_square);
+            away.appendChild(name_away);
+            away.appendChild(score_away);
+
+            const home_square = document.createElement("div");
+            home_square.className = "valid-square";
+            home.appendChild(home_square);
+            home.appendChild(name_home);
+            home.appendChild(score_home);
+
+            // Changes text size and font based who won the game
+            if(game.away_points < game.home_points){
+                home.className = "font-semibold text-[16px] flex pb-[10px] pt-[10px]";
+                away.className = "text-zinc-400 text-[16px] flex pb-[10px]";
+            } else {
+                home.className = "text-zinc-400 text-[16px] flex pb-[10px] pt-[10px]";
+                away.className = "font-semibold text-[16px] flex pb-[10px]"
+            }
+
+            newBox.appendChild(home);
+            newBox.appendChild(away);
+
             document.getElementById("boxes").appendChild(newBox);
-        } 
-        
-        // const newBox = document.createElement("div");
-        // const newBox2 = document.createElement("div");
+        }
 
-        // newBox.className = "score-box";
-        // newBox2.className =  "score-box";
-
-        // document.getElementById("boxes").appendChild(newBox);
-        // document.getElementById("boxes").appendChild(newBox2);
-
+        data.rounds.forEach((round : any, index : any) => {
+            // Skips "First Four" round
+            if (index != 0) {
+                // Only adds score boxes based on the button that was pressed
+                if(round.name === buttonName){
+                    if(index < 5){
+                        round.bracketed.forEach((region : any) => {
+                            region.games.forEach((game : any) => {
+                                document.getElementById("boxes").className = "columns-2";
+                                createNewElements(game);
+                            });
+                        });
+                    } else {
+                        round.games.forEach((game : any) => {
+                            if(index == 6){
+                                document.getElementById("boxes").className = "columns-1";
+                            } else {
+                                document.getElementById("boxes").className = "columns-2";
+                            }
+                                
+                            createNewElements(game);
+                        });
+                    }
+                }
+            }
+        })
     }
 
     // Data Fetch method that runs when the page is refreshed 
@@ -70,12 +120,12 @@ export function LiveScoresPage() {
 
     // ButtonBar dynamically adjusts itself based on how many dicts are in the 
     // "buttons" variable
-    const buttons = [{name: "Round of 64", date:"Mar 20 - 21"},
-                     {name: "Round of 32", date: "Mar 22 - 23"},
+    const buttons = [{name: "First Round", date:"Mar 20 - 21"},
+                     {name: "Second Round", date: "Mar 22 - 23"},
                      {name: "Sweet 16", date: "Mar 27 - 28"},
-                     {name: "Elite 8", date: "Mar 29 - 30"},
-                     {name: "Final 4", date: "Apr 5"},
-                     {name: "Final", date: "Apr 7"}]
+                     {name: "Elite Eight", date: "Mar 29 - 30"},
+                     {name: "Final Four", date: "Apr 5"},
+                     {name: "National Championship", date: "Apr 7"}]
 
     return (
         <div>
