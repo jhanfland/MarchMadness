@@ -219,30 +219,26 @@ def create_user_bracket():
 def delete_user_bracket():
     # User Verification
     user, mes, errNum = verify_user()
-    if user == None:
+    if user is None:
         return mes, errNum
-    # Get bracket number  and bracket selection
+
+    # Get bracket number from request
     data = request.get_json()
     bracket_number = data.get("bracket_number")
     if not bracket_number:
-        return (
-            jsonify({"error": "Bracket number is required"}),
-            400,
-        )
-    # Check if the user already has a bracket for the given bracket_number
+        return jsonify({"error": "Bracket number is required"}), 400
+
+    # Find existing bracket
     existing_bracket = Bracket.query.filter_by(
         id=user.id, bracket_number=bracket_number
     ).first()
+
     if existing_bracket:
-        Bracket.remove(existing_bracket)
+        db.session.delete(existing_bracket)
         db.session.commit()
+        return jsonify({"message": "Bracket deleted successfully"}), 200
     else:
         return jsonify({"error": "Bracket not found"}), 404
-
-    return (
-        jsonify({"message": "Bracket deleted successfully"}),
-        200,
-    )
 
 
 # User Verification

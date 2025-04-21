@@ -15,6 +15,7 @@ export default function BracketPage({
 }) {
   // "initialBrackets" for testability — allows tests to simulate empty or preset states without hardcoding logic (was "mockBracket" before)
   const [brackets, setBrackets] = useState<BracketType[]>(initialBrackets);
+  const [newBracket, setNewBracket] = useState<BracketType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [score, setScore] = useState<number | null>(null);
@@ -230,8 +231,7 @@ export default function BracketPage({
       const data = await API.json();
       const bracket_num_data = await bracket_number.json();
       /* update list of brackets and create bracket */
-      setBrackets((prev) => [
-        ...prev,
+      setNewBracket([
         {
           id: bracket_num_data.next_bracket_number,
           title: data.title,
@@ -245,38 +245,41 @@ export default function BracketPage({
     }
   };
 
-  const deleteBracket = async (bracket: BracketType) => {
+  const deleteBracket = async (bracket: BracketType, isOnBackend = true) => {
     const token = localStorage.getItem("token");
 
     //Call backend
 
-    fetch(`${BACKEND_URL}/delete_user_bracket`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        bracket_number: bracket.id,
-      }),
-    })
-      .then((r) => {
-        if (r.status == 200) {
-          return r.json();
-        } else if (r.status == 404) {
-          throw new Error("Bracket not found on backend");
-        } else {
-          throw new Error("Error with deletion");
-        }
+    if (isOnBackend) {
+      fetch(`${BACKEND_URL}/delete_user_bracket`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          bracket_number: bracket.id,
+        }),
       })
-      .then((data) => {
-        console.log("Deleted bracket #", bracket.id, "on the backend");
-      })
-      .catch((e) => {
-        console.error(e);
-      });
+        .then((r) => {
+          if (r.status == 200) {
+            return r.json();
+          } else if (r.status == 404) {
+            throw new Error("Bracket not found on backend");
+          } else {
+            throw new Error("Error with deletion");
+          }
+        })
+        .then((data) => {
+          console.log("Deleted bracket #", bracket.id, "on the backend");
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    }
 
     setBrackets((prev) => prev.filter((b) => b.id != bracket.id));
+    setNewBracket((prev) => prev.filter((b) => b.id != bracket.id));
   };
 
   const saveBracket = async (bracket_number: number) => {
@@ -347,6 +350,8 @@ export default function BracketPage({
       if (!scoreResponse.ok) throw new Error("Scoring failed");
       const scoreData = await scoreResponse.json();
       setScore(scoreData.score); // update the score state with returned score
+      setBrackets((prev) => [...prev, newBracket[0]]);
+      setNewBracket([]);
     } catch (error) {
       console.error("Error saving bracket:", error);
       setError("Failed to save bracket.");
@@ -358,45 +363,85 @@ export default function BracketPage({
       <h1 className="text-2xl font-bold mb-4">Brackets</h1>
       {loading && <p>Loading brackets...</p>}
       {error && <p className="text-red-500">Error: {error}</p>}
-      {!loading && !error && brackets.length > 0 ? (
-        <ul>
-          {brackets.map((bracket, index) => {
-            const selectedTeams = selectedTeamsMap[bracket.id] || {};
+      {(!loading && !error && brackets.length > 0) || newBracket.length > 0 ? (
+        <>
+          <ul>
+            {brackets.map((bracket, index) => {
+              const selectedTeams = selectedTeamsMap[bracket.id] || {};
 
-            return (
-              <li key={index} className="mb-2 border p-2 rounded">
-                <div className="relative">
-                  <Bracket
-                    ref={bracketRef}
-                    bracket={bracket}
-                    liveBracket={false}
-                    initialSelection={selectedTeams}
-                    onChange={(newMap) =>
-                      setSelectedTeamsMap((prev) => ({
-                        ...prev,
-                        [bracket.id]: newMap,
-                      }))
-                    }
-                  />
-                  <div className="absolute bottom-2 right-2 flex gap-2">
-                    <Button
-                      onClick={() => deleteBracket(bracket)}
-                      className="bg-[var(--primary-color)] font-bold hover:bg-blue-900"
-                    >
-                      DELETE
-                    </Button>
-                    <Button
-                      onClick={() => saveBracket(bracket.id)}
-                      className="bg-[var(--primary-color)] font-bold hover:bg-blue-900"
-                    >
-                      SAVE
-                    </Button>
+              return (
+                <li key={index} className="mb-2 border p-2 rounded">
+                  <div className="relative">
+                    <Bracket
+                      ref={bracketRef}
+                      bracket={bracket}
+                      liveBracket={false}
+                      initialSelection={selectedTeams}
+                      onChange={(newMap) =>
+                        setSelectedTeamsMap((prev) => ({
+                          ...prev,
+                          [bracket.id]: newMap,
+                        }))
+                      }
+                    />
+                    <div className="absolute bottom-2 right-2 flex gap-2">
+                      <Button
+                        onClick={() => deleteBracket(bracket)}
+                        className="bg-red-600 font-bold hover:bg-red-900"
+                      >
+                        DELETE
+                      </Button>
+                      <Button
+                        onClick={() => saveBracket(bracket.id)}
+                        className="bg-[var(--primary-color)] font-bold hover:bg-blue-900"
+                      >
+                        SAVE
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+                </li>
+              );
+            })}
+          </ul>
+          <ul>
+            {newBracket.map((bracket, i) => {
+              const selectedTeams = selectedTeamsMap[bracket.id] || {};
+
+              return (
+                <li key={i} className="mb-2 border p-2 rounded">
+                  <div className="relative">
+                    <Bracket
+                      ref={bracketRef}
+                      bracket={bracket}
+                      liveBracket={false}
+                      initialSelection={selectedTeams}
+                      onChange={(newMap) =>
+                        setSelectedTeamsMap((prev) => ({
+                          ...prev,
+                          [bracket.id]: newMap,
+                        }))
+                      }
+                    />
+                    <div className="absolute bottom-2 right-2 flex gap-2">
+                      <Button
+                        onClick={() => deleteBracket(bracket, false)}
+                        className="bg-red-600 font-bold hover:bg-red-900"
+                      >
+                        DELETE
+                      </Button>
+                      <Button
+                        onClick={() => saveBracket(bracket.id)}
+                        className="bg-[var(--primary-color)] font-bold hover:bg-blue-900"
+                      >
+                        SAVE
+                      </Button>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       ) : (
         !loading && !error && <p>No brackets found.</p>
       )}
@@ -409,6 +454,7 @@ export default function BracketPage({
         <Button
           onClick={() => createBracket()}
           className="bg-[var(--primary-color)] font-bold hover:bg-blue-900 mt-4"
+          disabled={newBracket.length > 0 ? true : false}
         >
           CREATE NEW BRACKET
         </Button>
