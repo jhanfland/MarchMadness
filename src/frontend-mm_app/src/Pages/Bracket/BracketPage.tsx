@@ -22,7 +22,7 @@ export default function BracketPage({
     Record<number, Record<string, string>>
   >({});
   const token = localStorage.getItem("token");
-  const bracketRef = useRef<any>(null);
+  const bracketRefs = useRef<Record<number, any>>({}); // multiple refs for each bracket
 
   useEffect(() => {
     async function fetchBrackets() {
@@ -206,7 +206,7 @@ export default function BracketPage({
   };
 
   const createBracket = async () => {
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
 
     try {
       const API = await fetch(`${BACKEND_URL}/generate_bracket_template`, {
@@ -229,6 +229,7 @@ export default function BracketPage({
       /* saves data to react */
       const data = await API.json();
       const bracket_num_data = await bracket_number.json();
+      console.log("Bracket number data:", bracket_num_data);
       /* update list of brackets and create bracket */
       setBrackets((prev) => [
         ...prev,
@@ -246,10 +247,19 @@ export default function BracketPage({
   };
 
   const saveBracket = async (bracket_number: number) => {
+  
+    // Get the specific bracket ref for this bracket number
+    const bracketRef = bracketRefs.current[bracket_number];
+    if (!bracketRef) {
+      console.error(`No ref found for bracket ${bracket_number}`);
+      setError("Failed to save bracket: Reference not found");
+      return;
+    }
+    
     const token = localStorage.getItem("token");
 
     // Grab the parsed bracket from the reference.
-    const bracket = bracketRef.current?.getParsedBracketData();
+    const bracket = bracketRef.getParsedBracketData();
     console.log("parsedBracketData", bracket);
     if (!bracket) {
       alert("Please finish all 63 picks before saving!");
@@ -312,6 +322,7 @@ export default function BracketPage({
 
       if (!scoreResponse.ok) throw new Error("Scoring failed");
       const scoreData = await scoreResponse.json();
+      console.log("Score data: ", scoreData)
       setScore(scoreData.score); // update the score state with returned score
     } catch (error) {
       console.error("Error saving bracket:", error);
@@ -332,17 +343,17 @@ export default function BracketPage({
             return (
               <li key={index} className="mb-2 border p-2 rounded">
                 <div className="relative">
-                  <Bracket
-                    ref={bracketRef}
-                    bracket={bracket}
-                    liveBracket={false}
+                  <Bracket 
+                    ref={(el) => { if (el) { bracketRefs.current[bracket.id] = el; }}}
+                    bracket={bracket} 
+                    liveBracket={false} 
                     initialSelection={selectedTeams}
                     onChange={(newMap) =>
                       setSelectedTeamsMap((prev) => ({
                         ...prev,
                         [bracket.id]: newMap,
                       }))
-                    }
+                    
                   />
                   <div className="absolute bottom-2 right-2">
                     <Button
@@ -359,7 +370,7 @@ export default function BracketPage({
         </ul>
       ) : (
         !loading && !error && <p>No brackets found.</p>
-      )}
+      )
 
       {score !== null && (
         <p className="text-xl font-bold mt-4">Score: {score}</p>
