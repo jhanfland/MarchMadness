@@ -98,6 +98,27 @@ def get_bracket_id():
     next_bracket_number = (max_bracket or 0) + 1
     return jsonify({'next_bracket_number': next_bracket_number})
 
+@bracket_bp.route('/get_user_bracket_numbers', methods=['GET'])
+def get_user_bracket_numbers():
+    user, mes, errNum = verify_user()
+    if user is None:
+        return mes, errNum
+
+    # all bracket_numbers (# of brackets) for the user
+    bracket_numbers = (
+        db.session.query(Bracket.bracket_number)
+        .filter_by(id=user.id)
+        .order_by(Bracket.bracket_number.asc())
+        .all()
+    )
+
+    bracket_numbers = [bn[0] for bn in bracket_numbers]
+
+    return jsonify({
+        'message': 'Bracket numbers retrieved successfully',
+        'bracket_numbers': bracket_numbers
+    }), 200
+
 # Returns users bracket that has already been created
 @bracket_bp.route('/get_user_bracket/<int:bracket_number>', methods=['GET'])
 def get_user_bracket(bracket_number):
