@@ -5,6 +5,8 @@ import BracketPage from "./Pages/Bracket/BracketPage";
 import Navbar from './components/navbar';
 import Homepage from './Pages/Homepage';
 import LiveBracketPage from './Pages/Bracket/LiveBracketPage';
+import Chatbot from './components/Chatbot';
+import { LiveScoresPage } from './Pages/LiveScoresPage';
 
 // Main App component with React Router integrated
 function App() {
@@ -17,7 +19,9 @@ function App() {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/bracket" element={<BracketPage />} />
         <Route path="/liveBracket" element={<LiveBracketPage />} />
+        <Route path="/scores" element={<LiveScoresPage />} />
       </Routes>
+      <Chatbot />
     </Router>
   );
 }

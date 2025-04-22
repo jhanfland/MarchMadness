@@ -23,6 +23,8 @@ import { C } from "vitest/dist/chunks/reporters.d.CfRkRKN2.js";
 interface BracketProps {
   bracket: BracketType; // The 'bracket' prop is of type BracketType
   liveBracket: Boolean; // The 'liveBracket' prop is of type boolean
+  onChange?: (selected: Record<string, string>) => void; // updates selectedTeamsMap when team is picked
+  initialSelection?: Record<string, string>; // how saved bracket data is passed from bracketpage to bracket
 }
 
 interface CustomSeedProps {
@@ -219,7 +221,7 @@ const CustomSeed = ({
 };
 
 const Bracket = forwardRef(function Bracket(
-  { bracket, liveBracket }: BracketProps,
+  { bracket, liveBracket, onChange, initialSelection }: BracketProps,
   ref
 ) {
   const [selectedRegion, setSelectedRegion] = useState<Region>("EAST");
@@ -258,14 +260,27 @@ const Bracket = forwardRef(function Bracket(
     },
   ]);
 
+  // updates that bracket state has changed to save correct data
+  useEffect(() => {
+    if (onChange) onChange(selectedTeams);
+  }, [selectedTeams]);
+
+  // what renders all saved button picks
+  useEffect(() => {
+    if (initialSelection && Object.keys(initialSelection).length > 0) {
+      setSelectedTeams(initialSelection);
+    }
+  }, [initialSelection]);
+
   // updates everytime reigon changes
   useEffect(() => {
     // tests to make sure code doesn't crash or overwrite
     if (!bracket?.regions?.[selectedRegion]) return;
+    if (!bracket.regions[selectedRegion].rounds?.[0]) return;
     if (selectedRegion === "FINAL FOUR") return;
 
     // uses the bracket reigons to build the baseSeeds for rnd 64
-    const baseSeeds = bracket.regions[selectedRegion];
+    const baseSeeds = bracket.regions[selectedRegion].rounds[0].seeds;
 
     const newRounds: Round[] = [
       {
@@ -429,6 +444,7 @@ const Bracket = forwardRef(function Bracket(
   useImperativeHandle(ref, () => ({
     getParsedBracketData: () => parseSelectedTeamData(selectedTeams),
   }));
+
   //
   /**
    * We need to move this function to BracketPage but will work on that later when working with Norris
@@ -438,6 +454,8 @@ const Bracket = forwardRef(function Bracket(
    * @param data
    * @returns
    */
+
+  // parsed for scoring (only saves winner) - JACK'S LOGIC
   function parseSelectedTeamData(selectedTeams: Record<string, string>) {
     // Ensure the full bracket has been picked.
     if (Object.keys(selectedTeams).length !== 63) {
@@ -563,3 +581,4 @@ const Bracket = forwardRef(function Bracket(
 });
 
 export default Bracket;
+

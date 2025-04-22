@@ -24,9 +24,11 @@ def create_app():
     from app.routes.auth import auth_bp
     from app.routes.main import main_bp
     from app.routes.bracket import bracket_bp
+    from app.routes.chatbot import chatbot_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(bracket_bp)
+    app.register_blueprint(chatbot_bp)
     
      # Register error handlers
     from app.error_handlers import register_error_handlers

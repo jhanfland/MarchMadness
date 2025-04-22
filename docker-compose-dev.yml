@@ -32,7 +32,9 @@ services:
     container_name: FlaskBackend
 
   frontend:
-    build: ./src/frontend-mm_app
+    build:
+      context: ./src/frontend-mm_app
+      dockerfile: Dockerfile.dev
     restart: always
     environment:
       VITE_BACKEND_URL: http://backend:8000
