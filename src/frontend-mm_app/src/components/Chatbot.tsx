@@ -118,23 +118,35 @@ const Chatbot = () => {
         const intent = data.intents[0].name;
         // Process the intent and provide appropriate response 
         switch (intent) {
+          case 'hello':
+            _updateLastMessage("Hello! How can I assist you today?");
+            break;
           case 'app_features':
             _updateLastMessage("I can help you fill out your bracket, check scores, and more!");
             break;
           case 'future_features':
-            _updateLastMessage("FILL IN");
+            _updateLastMessage("We’re working on currency features, live game feedback, and advanced bracket analytics. Stay tuned!");
             break;
           case 'live_bracket':
-            _updateLastMessage("FILL IN");
+            _updateLastMessage("You can check the live bracket on the 'Live Bracket' page to see updated match results and progression.");
             break;
           case 'login_help':
-            _updateLastMessage("FILL IN");
+            _updateLastMessage("Having trouble logging in? Make sure your email and password are correct. You can also click 'Show Password' to make sure you typed it correct.");
             break;
           case 'signup_help':
-            _updateLastMessage("FILL IN");
+            _updateLastMessage("To sign up, click 'Sign Up Now' and follow the steps to create your account.");
             break;
           case 'user_bracket':
-            _updateLastMessage("FILL IN");
+            _updateLastMessage("You can create your own bracket on the 'My Bracket' page.");
+            break;
+          case 'edit_bracket':
+            _updateLastMessage("You can edit your bracket on the 'My Bracket' page. Just click on the bracket you want to edit.");
+            break;
+          case 'scoring':
+            _updateLastMessage("Points are awarded for each correct pick. The further into the tournament, the more points each round is worth.");
+            break;
+          case 'acknowledge':
+            _updateLastMessage("Of course. If you have any other questions, feel free to ask!");
             break;
           default:
             // Use OPENAI API TO GENERATE RESPONSE
