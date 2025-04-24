@@ -60,6 +60,7 @@ const CustomSeed = ({
             </div>
           </SeedTeam>
         </SeedItem>
+        <p className="text-xs mt-1">{seed.location}</p>
       </Seed>
     )
   } else {
@@ -321,7 +322,7 @@ const Bracket = forwardRef(function Bracket(
             )}
           />
         ) : (
-          <ReactBracket rounds={bracket[0].rounds} renderSeedComponent={(props) => (
+          <ReactBracket rounds={bracket.rounds} renderSeedComponent={(props) => (
             <CustomSeed
               {...props}
               region={selectedRegion}
@@ -336,9 +337,6 @@ const Bracket = forwardRef(function Bracket(
     );
   }
 
-  
-
-  console.log("selected Teams", selectedTeams, "parsed data", parseSelectedTeamData(selectedTeams));
   /**
    * This is how we propogate it up to save button
    */
@@ -450,7 +448,7 @@ const Bracket = forwardRef(function Bracket(
 
   return (
     <div>
-      <p> {bracket.title} </p>
+      <p className="text-center py-8 text-2xl font-bold"> {bracket.title} </p>
       {createBracket()}
       {liveBracket === false && (
         <div className="flex gap-5">

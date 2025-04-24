@@ -107,12 +107,10 @@ const Chatbot = () => {
    * @param message - The user's message to process
    */
   const _aiResponse = (message: string): void => {
-    // Make Wit.ai API call
-    fetch(`/api/witai?message=${encodeURIComponent(message)}`)
+    // Make Wit.ai API call through our backend proxy
+    fetch(`http://localhost:8000/api/witai?message=${encodeURIComponent(message)}`)
     .then(response => response.json())
     .then(data => {
-      console.log('Wit.ai response:', data);
-      
       // Handle the Wit.ai response based on detected intent
       if (data.intents && data.intents.length > 0) {
         const intent = data.intents[0].name;
@@ -125,7 +123,7 @@ const Chatbot = () => {
             _updateLastMessage("I can help you fill out your bracket, check scores, and more!");
             break;
           case 'future_features':
-            _updateLastMessage("We’re working on currency features, live game feedback, and advanced bracket analytics. Stay tuned!");
+            _updateLastMessage("We're working on currency features, live game feedback, and advanced bracket analytics. Stay tuned!");
             break;
           case 'live_bracket':
             _updateLastMessage("You can check the live bracket on the 'Live Bracket' page to see updated match results and progression.");
@@ -149,30 +147,44 @@ const Chatbot = () => {
             _updateLastMessage("Of course. If you have any other questions, feel free to ask!");
             break;
           default:
-            // Use OPENAI API TO GENERATE RESPONSE
-            //       const requestOptions = {
-            //         method: "POST",
-            //         headers: {
-            //           "Content-Type": "application/json",
-            //           "Authorization": `Bearer ${OPENAI_API_KEY}`
-            //         },
-            //         body: JSON.stringify({
-            //           model: "gpt-3.5-turbo",
-            //           messages: [{ role: "user", content: message }]
-            //         })
-            //       };
-            //       fetch(PENAI_API_URL, requestOptions)
-            //         .then(res => res.json())
-            //         .then(data => {
-            //           _updateLastMessage(data.choices[0].message.content);
-            //         })
-            //         .catch(() => {
-            //           _updateLastMessage("I'm sorry, I couldn't understand that. Please try again.");
-            //         });
-            _updateLastMessage("Handle this case later");
+            // Use OpenAI API through our backend proxy
+            fetch('http://localhost:8000/api/openai', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ message })
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.error) {
+                throw new Error(data.error);
+              }
+              _updateLastMessage(data.choices[0].message.content);
+            })
+            .catch(() => {
+              _updateLastMessage("I'm sorry, I couldn't understand that. Please try again.");
+            });
         }
       } else {
-        _updateLastMessage("Use the GPT fallback");
+        // Use OpenAI API through our backend proxy when no intent is detected
+        fetch('http://localhost:8000/api/openai', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            throw new Error(data.error);
+          }
+          _updateLastMessage(data.choices[0].message.content);
+        })
+        .catch(() => {
+          _updateLastMessage("I'm sorry, I couldn't understand that. Please try again.");
+        });
       }
     })
     .catch(error => {
