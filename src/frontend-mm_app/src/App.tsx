@@ -7,6 +7,7 @@ import Homepage from './Pages/Homepage';
 import LiveBracketPage from './Pages/Bracket/LiveBracketPage';
 import Chatbot from './components/Chatbot';
 import { LiveScoresPage } from './Pages/LiveScoresPage';
+import AccountPage from './Pages/AccountPage';
 
 // Main App component with React Router integrated
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path="/bracket" element={<BracketPage />} />
         <Route path="/liveBracket" element={<LiveBracketPage />} />
         <Route path="/scores" element={<LiveScoresPage />} />
+        <Route path="/account" element={<AccountPage />} />
       </Routes>
       <Chatbot />
     </Router>

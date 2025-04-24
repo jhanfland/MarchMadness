@@ -39,6 +39,8 @@ export function LoginForm() {
 
       localStorage.setItem("token", data.token);
       navigate("/");
+      localStorage.setItem("passwordLength", password.length.toString());
+      navigate("/");
     } catch (error: any) {
       console.error("Login failed:", error);
       setError("Login Failed")
