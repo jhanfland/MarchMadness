@@ -74,3 +74,14 @@ Our plans for the upcoming weeks are to continue developing some missing feature
 This week our group added a save bracket feature that adds the user bracket to the bracket table in our database. This has put us in a succesful spot as far as finishing our bracket scoring and functionality. Additionally, we added new UI changes to improve the look of our homepage.
 
 Our plan for next week is to finish everything related to the brackets for good. Outside of this we can begin focusing on improving our CI/CD pipeline, deploying our production containers, and finally adding any optional features that our group agrees on.
+## Sprint 3, Week 2 (April 9 - April 16) - Progress Report
+This week our group added user bracket retrieval and rendering. We also finished bracket scoring and began working on some final features that we want to add. We are on track to have a finished product.
+
+Our plan for next week is to finish flushing out our new features and fix some bugs present in our user bracket system.
+
+## Sprint 3, Week 3 (April 16 - April 23) - Progress Report
+This week our group added new bug fixes, a live scores page, settings page, and a chatbot. We are almost ready for our final demo. We just need to implement a few more patches to fix bugs with the chatbot and bracket.
+
+Our plan for next week is to fix the final bugs, complete the priority 3 issues, and prepare for the final demo.
+
+
