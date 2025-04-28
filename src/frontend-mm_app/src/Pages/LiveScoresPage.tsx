@@ -36,8 +36,8 @@ export function LiveScoresPage() {
             name_home.innerHTML = game.home.alias;
             score_away.innerHTML = game.away_points;
             score_home.innerHTML = game.home_points;
-            name_away.className = "mr-auto";
-            name_home.className = "mr-auto";
+            name_away.className = "mr-auto pl-2";
+            name_home.className = "mr-auto pl-2";
 
             // Inserts team logos into score boxes
             const images = import.meta.glob('../images/ncaa_logos/*.svg', { eager: true });
@@ -46,7 +46,6 @@ export function LiveScoresPage() {
                 if(game.away.alias == team_alias){
                     const img = document.createElement('img');
                     img.src = images[path].default;
-                    img.style = "mt-auto mb-auto pr-100 h-100";
                     img.width = 25;
                     away.appendChild(img);
                 }
@@ -54,7 +53,6 @@ export function LiveScoresPage() {
                 if(game.home.alias == team_alias){
                     const img = document.createElement('img');
                     img.src = images[path].default;
-                    img.class = "mt-auto mb-auto";
                     img.width = 25;
                     home.appendChild(img);
                 }
