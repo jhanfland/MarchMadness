@@ -8,7 +8,7 @@ This project will be able to provide a platform for users to bet money on basket
 ## Docker
 How to start containers:
 
-Command for starting contaiers in a development environment:
+Command for starting containers in a development environment:
 ```shell
 docker-compose -f docker-compose-dev.yml up --build
 ```
