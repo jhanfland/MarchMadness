@@ -7,75 +7,128 @@ export default function AccountPage() {
   const [passwordMask, setPasswordMask] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [success, setSuccess] = useState(""); 
+  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 
+
+  // get info when login/logout
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const length = localStorage.getItem("passwordLength");
-
-    if (!token) {
+    const currentToken = localStorage.getItem("token");
+    setToken(currentToken); // updates token
+  
+    if (!currentToken) {
       setIsLoggedIn(false);
+      setCurrentEmail("");
+      setPasswordMask("");
+      setEmail("");
+      setPassword("");
+      setStatus("");
+      setSuccess("");
       return;
     }
-
+  
+    // token = exists, user = logged in
     setIsLoggedIn(true);
-
+  
+    const length = localStorage.getItem("passwordLength");
+  
+    // get user info from backend
     fetch("http://localhost:8000/auth/get-user", {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${currentToken}`,
       },
     })
       .then((res) => res.json())
       .then((data) => {
+        // set user email from backend
         setCurrentEmail(data.email);
-
+  
+        // clear all fields
+        setEmail(""); 
+        setPassword(""); 
+        setStatus("");
+        setSuccess("");
+  
         if (length) {
           setPasswordMask("*".repeat(parseInt(length)));
         } else {
           setPasswordMask("********");
         }
       });
-  }, []);
+  }, [token]);
 
+  // function handles saving updates
   const handleSave = async () => {
-    const token = localStorage.getItem("token");
+    const savedToken = localStorage.getItem("token"); // new token for updates
+  
+    // clear
+    setStatus("");
+    setSuccess("");
+  
+    // validate email
+    if (email.trim() !== "") {
+      if (!email.includes("@") || !/\.\w{3,}$/.test(email)) {
+        setStatus("Please enter a valid email address.");
+        return;
+      }
+      if (email.trim() === currentEmail) {
+        setStatus("New email must be different from current email.");
+        return;
+      }
+    }
+  
+    // send data to backend
     const formData = new FormData();
     formData.append("email", email);
     if (password) formData.append("password", password);
-    if (file) formData.append("profile_picture", file);
-
-    const res = await fetch("http://localhost:8000/auth/update-profile", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
-
-    const result = await res.json();
-
-    if (res.ok) {
-      alert("Account updated");
-
-      // update current info if email was changed
+  
+    try {
+      const response = await fetch("http://localhost:8000/auth/update-profile", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${savedToken}` },
+        body: formData,
+      });
+  
+      const result = await response.json();
+  
+      if (!response.ok) {
+        // handling errors
+        const errorMessage = result.error || "Update failed";
+        if (errorMessage.toLowerCase().includes("email already")) {
+          setStatus("This email is already in use. Please choose a different one.");
+        } else {
+          setStatus(errorMessage);
+        }
+        return;
+      }
+  
+      // success, update succesful
+      setSuccess("Account updated successfully.");
+      setEmail("");
+      setPassword("");
+      setStatus("");
+  
+      // refresh token and login state
+      const updatedToken = localStorage.getItem("token");
+      setToken(updatedToken);
+  
+      // update displayed user password and email
       if (email !== currentEmail && email.trim() !== "") {
         setCurrentEmail(email);
       }
-
-      // update password new password was submitted
       if (password.length > 0) {
         setPasswordMask("*".repeat(password.length));
         localStorage.setItem("passwordLength", password.length.toString());
       }
-
-      setEmail("");
-      setPassword("");
-      setFile(null);
-      setStatus("");
-    } else {
-      setStatus(result.error || "Update failed");
+  
+    } catch (error: any) {
+      console.error("Failed to update profile:", error);
+      setStatus("An unexpected error occurred.");
     }
   };
+  
 
   // show message if not logged in
   if (!isLoggedIn) {
@@ -102,27 +155,17 @@ export default function AccountPage() {
 
       <div className="bg-zinc-900 p-4 rounded-md shadow-md space-y-4">
         <h3 className="font-semibold text-lg">Update Info</h3>
-        <Input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Update Email"
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Update Email"
           className="bg-neutral-800 text-white placeholder-gray-400"
         />
-        <Input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Update New Password"
+        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Update Password"
           className="bg-neutral-800 text-white placeholder-gray-400"
         />
-        <Button
-          onClick={handleSave}
-          className="bg-white text-black hover:bg-gray-300"
+        <Button onClick={handleSave} className="bg-white text-black hover:bg-gray-300"
         >
           Save Changes
-        </Button>
-        {status && <p className="text-sm mt-2 text-red-400">{status}</p>}
+        </Button> {status && <p className="text-sm mt-2 text-red-400">{status}</p>}
+        {success && <p className="text-sm mt-2 text-green-400">{success}</p>}
       </div>
     </div>
   );
