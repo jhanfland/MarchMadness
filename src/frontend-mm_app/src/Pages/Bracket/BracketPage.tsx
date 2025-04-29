@@ -13,7 +13,6 @@ export default function BracketPage({
 }: {
   initialBrackets?: BracketType[];
 }) {
-  // "initialBrackets" for testability — allows tests to simulate empty or preset states without hardcoding logic (was "mockBracket" before)
   const [brackets, setBrackets] = useState<BracketType[]>(initialBrackets);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +21,7 @@ export default function BracketPage({
     Record<number, Record<string, string>>
   >({});
   const token = localStorage.getItem("token");
-  const bracketRefs = useRef<Record<number, any>>({}); // multiple refs for each bracket
+  const bracketRefs = useRef<Record<number, any>>({});
 
   useEffect(() => {
     async function fetchBrackets() {
@@ -38,7 +37,6 @@ export default function BracketPage({
         });
         const { bracket_numbers } = await res.json();
 
-        // loads each saved bracket from database
         const savedBrackets = await Promise.all(
           bracket_numbers.map(async (num) => {
             const res = await fetch(`${BACKEND_URL}/get_user_bracket/${num}`, {
@@ -49,7 +47,6 @@ export default function BracketPage({
           }),
         );
 
-        // loads a blank bracket to get rounds of 64 teams for correct seeding
         const templateRes = await fetch(
           `${BACKEND_URL}/generate_bracket_template`,
           {
@@ -58,15 +55,12 @@ export default function BracketPage({
         );
         const template = await templateRes.json();
 
-        // map to store user picks per bracket
         const selectionMap: Record<number, Record<string, string>> = {};
 
-        // for each bracket, call func that pulls out user selections, and stores bracket in map
         const formatted: BracketType[] = savedBrackets.map((saved) => {
           const selected = extractSelectedTeamsFromBracket(saved);
           selectionMap[saved.id] = selected;
 
-          // gives rnd 64 actual seeds and teamnames
           for (const region of ["EAST", "WEST", "SOUTH", "MIDWEST"]) {
             const seeds = template.regions[region];
             if (seeds?.length > 0) {
@@ -74,7 +68,6 @@ export default function BracketPage({
             }
           }
 
-          // helper func to parse team name and seed from map
           const getTeam = (key: string) => {
             const val = selected[key];
             if (!val) return { name: "TBD" };
@@ -82,7 +75,6 @@ export default function BracketPage({
             return { name, seed };
           };
 
-          // manually builds out final four region
           saved.regions["FINAL_FOUR"] = {
             rounds: [
               {
@@ -119,11 +111,9 @@ export default function BracketPage({
             ],
           };
 
-          // returns bracket object with seeds and final four
           return saved;
         });
 
-        // updates state to render correctly
         setBrackets(formatted);
         setSelectedTeamsMap(selectionMap);
       } catch (err) {
@@ -142,29 +132,20 @@ export default function BracketPage({
   ): Record<string, string> => {
     const selected: Record<string, string> = {};
 
-    // loops through each region, round, seed, and team
-    // constructs a selectedTeams object using a key of format
-    // Final four key, and region key for main bracket rnds
-
-    // OVERALL, function ensures every team lands in the correct
-    // matchup when restoring a saved bracket
     for (const [region, regionObj] of Object.entries(bracket.regions)) {
       const isFinalFour = region === "FINAL_FOUR";
       const regionKey = isFinalFour ? "FINAL FOUR" : region;
 
-      // iterates through base regions, rnds, seeds, teams
       regionObj.rounds?.forEach((round, roundIndex) => {
         round.seeds?.forEach((seed, seedIndex) => {
           seed.teams?.forEach((team, teamIndex) => {
             if (!team?.name || team.name === "TBD" || !team.seed) return;
 
-            // final four and championship rounds - specia key
             if (isFinalFour) {
               const key = `${roundIndex}-${seedIndex}-${regionKey}`;
               const value = `${team.seed}_${team.name}-${seed.id}-${teamIndex}`;
               selected[key] = value;
             } else {
-              // for Rounds 1–4, use `seed.id - 1` to recover original bracket position
               const key = `${roundIndex}-${seed.id - 1}-${regionKey}`;
               const value = `${team.seed}_${team.name}-${seed.id}-${teamIndex}`;
               selected[key] = value;
@@ -177,9 +158,6 @@ export default function BracketPage({
     return selected;
   };
 
-  // this func is what is used to dynamically render rounds
-  // and fill in the teams based on the user picks, as this func
-  // turns the raw seeds into a a full bracket to render
   const convertToRoundsFormat = (regionSeeds: Record<string, Seed[]>) => {
     const regionNames = ["EAST", "WEST", "SOUTH", "MIDWEST"];
     const roundTitles = ["First Round", "Second Round", "Sweet 16", "Elite 8"];
@@ -206,8 +184,6 @@ export default function BracketPage({
   };
 
   const createBracket = async () => {
-    // const token = localStorage.getItem("token");
-
     try {
       const API = await fetch(`${BACKEND_URL}/generate_bracket_template`, {
         headers: {
@@ -222,15 +198,14 @@ export default function BracketPage({
           Authorization: `Bearer ${token}`,
         },
       });
-      /* needs 200 response (.ok is boolean for 200) */
+
       if (!API.ok) throw new Error("Failed to get bracket");
       if (!bracket_number.ok)
         throw new Error("Failed to collect bracket id/number");
-      /* saves data to react */
+
       const data = await API.json();
       const bracket_num_data = await bracket_number.json();
-      console.log("Bracket number data:", bracket_num_data);
-      /* update list of brackets and create bracket */
+
       setBrackets((prev) => [
         ...prev,
         {
@@ -247,27 +222,21 @@ export default function BracketPage({
   };
 
   const saveBracket = async (bracket_number: number) => {
-  
-    // Get the specific bracket ref for this bracket number
     const bracketRef = bracketRefs.current[bracket_number];
     if (!bracketRef) {
       console.error(`No ref found for bracket ${bracket_number}`);
       setError("Failed to save bracket: Reference not found");
       return;
     }
-    
-    const token = localStorage.getItem("token");
 
-    // Grab the parsed bracket from the reference.
+    const token = localStorage.getItem("token");
     const bracket = bracketRef.getParsedBracketData();
-    console.log("parsedBracketData", bracket);
     if (!bracket) {
       alert("Please finish all 63 picks before saving!");
       return;
     }
 
     try {
-      // Save user bracket via the create_user_bracket endpoint.
       const saveResponse = await fetch(`${BACKEND_URL}/create_user_bracket`, {
         method: "POST",
         headers: {
@@ -280,9 +249,7 @@ export default function BracketPage({
         }),
       });
       const saveData = await saveResponse.json();
-      console.log("Saved bracket response:", saveData);
 
-      // Retrieve the saved user bracket.
       const userBracketResponse = await fetch(
         `${BACKEND_URL}/get_user_bracket/${bracket_number}`,
         {
@@ -297,7 +264,6 @@ export default function BracketPage({
         throw new Error("User bracket not found");
       }
 
-      // Retrieve the live bracket from the external API endpoint.
       const liveBracketResponse = await fetch(`${BACKEND_URL}/get_bracket`, {
         method: "GET",
         headers: {
@@ -305,9 +271,7 @@ export default function BracketPage({
         },
       });
       const liveBracketData = await liveBracketResponse.json();
-      console.log("User bracket: ", userBracketData.bracket);
-      console.log("Live Bracket: ", liveBracketData);
-      // Call the scoring endpoint with both the user and live bracket JSON objects.
+
       const scoreResponse = await fetch(`${BACKEND_URL}/score_bracket`, {
         method: "POST",
         headers: {
@@ -322,8 +286,7 @@ export default function BracketPage({
 
       if (!scoreResponse.ok) throw new Error("Scoring failed");
       const scoreData = await scoreResponse.json();
-      console.log("Score data: ", scoreData)
-      setScore(scoreData.score); // update the score state with returned score
+      setScore(scoreData.score);
     } catch (error) {
       console.error("Error saving bracket:", error);
       setError("Failed to save bracket.");
@@ -343,17 +306,21 @@ export default function BracketPage({
             return (
               <li key={index} className="mb-2 border p-2 rounded">
                 <div className="relative">
-                  <Bracket 
-                    ref={(el) => { if (el) { bracketRefs.current[bracket.id] = el; }}}
-                    bracket={bracket} 
-                    liveBracket={false} 
+                  <Bracket
+                    ref={(el) => {
+                      if (el) {
+                        bracketRefs.current[bracket.id] = el;
+                      }
+                    }}
+                    bracket={bracket}
+                    liveBracket={false}
                     initialSelection={selectedTeams}
-                    onChange={(newMap) =>
+                    onChange={(newMap) => {
                       setSelectedTeamsMap((prev) => ({
                         ...prev,
                         [bracket.id]: newMap,
-                      }))
-                    
+                      }));
+                    }}
                   />
                   <div className="absolute bottom-2 right-2">
                     <Button
@@ -370,7 +337,7 @@ export default function BracketPage({
         </ul>
       ) : (
         !loading && !error && <p>No brackets found.</p>
-      )
+      )}
 
       {score !== null && (
         <p className="text-xl font-bold mt-4">Score: {score}</p>
