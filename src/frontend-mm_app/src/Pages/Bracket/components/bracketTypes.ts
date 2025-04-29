@@ -10,7 +10,8 @@ export type Team = {
     teams: Team[],
     region?: Region,
     homeScore?: Number,
-    awayScore?: Number
+    awayScore?: Number,
+    location?: string
   };
   
   export type Round = {

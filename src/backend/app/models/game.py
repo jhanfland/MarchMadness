@@ -1,4 +1,6 @@
+# mypy: disable-error-code="name-defined"
 from app import db
+
 
 class Game(db.Model):
     __tablename__ = 'games'

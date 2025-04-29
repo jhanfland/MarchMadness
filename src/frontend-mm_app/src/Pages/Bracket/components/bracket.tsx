@@ -1,4 +1,10 @@
-import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
+import {
+  useEffect,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  Children,
+} from "react";
 import {
   Bracket as BracketType,
   Region,
@@ -12,6 +18,7 @@ import {
   SeedItem,
   SeedTeam,
 } from "react-brackets";
+import { C } from "vitest/dist/chunks/reporters.d.CfRkRKN2.js";
 
 interface BracketProps {
   bracket: BracketType; // The 'bracket' prop is of type BracketType
@@ -53,8 +60,15 @@ const CustomSeed = ({
                 justifyContent: "space-between",
                 width: "100%",
               }}
+              className={
+                seed.homeScore > seed.awayScore
+                  ? "text-green-500"
+                  : "text-red-500"
+              }
             >
-              <span>{`${seed.teams[0]?.seed ?? ""}  ${seed.teams[0]?.name ?? ""}`}</span>
+              <span>{`${seed.teams[0]?.seed ?? ""}  ${
+                seed.teams[0]?.name ?? ""
+              }`}</span>
               <span>{seed.homeScore ?? ""}</span>
             </div>
           </SeedTeam>
@@ -65,12 +79,20 @@ const CustomSeed = ({
                 justifyContent: "space-between",
                 width: "100%",
               }}
+              className={
+                seed.homeScore < seed.awayScore
+                  ? "text-green-500"
+                  : "text-red-500"
+              }
             >
-              <span>{`${seed.teams[1]?.seed ?? ""}  ${seed.teams[1]?.name ?? ""}`}</span>
+              <span>{`${seed.teams[1]?.seed ?? ""}  ${
+                seed.teams[1]?.name ?? ""
+              }`}</span>
               <span>{seed.awayScore ?? ""}</span>
             </div>
           </SeedTeam>
         </SeedItem>
+        <p className="text-xs mt-1">{seed.location}</p>
       </Seed>
     );
   } else {
@@ -138,8 +160,18 @@ const CustomSeed = ({
       <Seed mobileBreakpoint={breakpoint}>
         <SeedItem>
           <div className="text-left">
-            <SeedTeam style={{ color: "var(--primary-color)" }}>
-              {`${seed.teams[0]?.seed ?? ""}  ${seed.teams[0]?.name ?? "NO TEAM "}`}
+            <SeedTeam
+              className={
+                selection[key] === value1
+                  ? "text-green-500"
+                  : selection[key] === value2
+                  ? "text-red-500"
+                  : "text-blue-200"
+              }
+            >
+              {`${seed.teams[0]?.seed ?? ""}  ${
+                seed.teams[0]?.name ?? "NO TEAM "
+              }`}
               <input
                 disabled={[
                   "TBD",
@@ -155,8 +187,18 @@ const CustomSeed = ({
                 onChange={() => updateSelection(value1)}
               />
             </SeedTeam>
-            <SeedTeam>
-              {`${seed.teams[1]?.seed ?? ""}  ${seed.teams[1]?.name ?? "NO TEAM "}`}
+            <SeedTeam
+              className={
+                selection[key] === value2
+                  ? "text-green-500"
+                  : selection[key] === value1
+                  ? "text-red-500"
+                  : "text-blue-200"
+              }
+            >
+              {`${seed.teams[1]?.seed ?? ""}  ${
+                seed.teams[1]?.name ?? "NO TEAM "
+              }`}
               <input
                 disabled={[
                   "TBD",
@@ -186,7 +228,7 @@ const Bracket = forwardRef(function Bracket(
   const [selectedRegion, setSelectedRegion] = useState<Region>("EAST");
 
   const [selectedTeams, setSelectedTeams] = useState<Record<string, string>>(
-    {},
+    {}
   );
 
   const [rounds, setRounds] = useState<Round[]>([]);
@@ -374,18 +416,16 @@ const Bracket = forwardRef(function Bracket(
             )}
           />
         ) : (
-          <ReactBracket
-            rounds={bracket[0].rounds}
-            renderSeedComponent={(props) => (
-              <CustomSeed
-                {...props}
-                region={selectedRegion}
-                selection={selectedTeams}
-                setSelection={setSelectedTeams}
-                liveBracket={liveBracket}
-              />
-            )}
-          />
+          <ReactBracket rounds={bracket.rounds} renderSeedComponent={(props) => (
+            <CustomSeed
+              {...props}
+              region={selectedRegion}
+              selection={selectedTeams}
+              setSelection={setSelectedTeams}
+              liveBracket={liveBracket}
+            />
+          )}
+        />
         )}
       </>
     );
@@ -397,6 +437,16 @@ const Bracket = forwardRef(function Bracket(
   useImperativeHandle(ref, () => ({
     getParsedBracketData: () => parseSelectedTeamData(selectedTeams),
   }));
+
+  //
+  /**
+   * We need to move this function to BracketPage but will work on that later when working with Norris
+   * This method should parse the data properly in this format, for easy db retrieval, and score comparison
+   * Format of JSON
+   * 0-1-EAST: "8_Mississippi State Bulldogs-2-0" --> (Round(horizontal))-(Index(vertical))-(REGION):(Seed)_(Team Name)-(Index(vertical) + 1)-(teamIndex from matchup -- either 0 or 1)
+   * @param data
+   * @returns
+   */
 
   // parsed for scoring (only saves winner) - JACK'S LOGIC
   function parseSelectedTeamData(selectedTeams: Record<string, string>) {
@@ -500,7 +550,7 @@ const Bracket = forwardRef(function Bracket(
 
   return (
     <div>
-      <p> {bracket.title} </p>
+      <p className="text-center py-8 text-2xl font-bold"> {bracket.title} </p>
       {createBracket()}
       {liveBracket === false && (
         <div className="flex gap-5">
