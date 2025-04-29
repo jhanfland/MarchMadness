@@ -1,13 +1,8 @@
-<<<<<<< HEAD
 import datetime
 
 import requests
-from app import api_key, db, mm_tournament_id, prev_mm_tournament_id
-=======
-# mypy: disable-error-code="import-not-found, import-untyped"
 from flask import Blueprint, request, jsonify, session
 from app import db, api_key, mm_tournament_id, prev_mm_tournament_id
->>>>>>> main
 from app.models.bracket import Bracket
 from app.models.user import User
 from app.scoring import score_bracket
@@ -19,14 +14,7 @@ from sqlalchemy import func
 bracket_bp = Blueprint("bracket", __name__)
 
 
-<<<<<<< HEAD
-@bracket_bp.route("/score_bracket", methods=["POST"])
-=======
-bracket_bp = Blueprint('bracket', __name__)
-
-
 @bracket_bp.route('/score_bracket', methods=['POST'])
->>>>>>> main
 def score_user_bracket():
     # Verify the user.
     user, mes, errNum = verify_user()
@@ -38,11 +26,7 @@ def score_user_bracket():
     live_bracket = data.get("live_bracket")
     if not user_bracket or not live_bracket:
         return (
-<<<<<<< HEAD
-            jsonify({"error": "Both user_bracket and live_bracket are required"}),
-=======
             jsonify({'error': 'Both user_bracket and live_bracket are required'}),
->>>>>>> main
             400,
         )
     # Calculate the score by comparing the user bracket with the live bracket.
@@ -118,11 +102,7 @@ def generate_bracket_template():
     return jsonify(bracket), 200
 
 
-<<<<<<< HEAD
-@bracket_bp.route("/get_user_bracket_id", methods=["GET"])
-=======
 @bracket_bp.route('/get_user_bracket_id', methods=['GET'])
->>>>>>> main
 def get_bracket_id():
     user, mes, errNum = verify_user()
     if user == None:
@@ -137,11 +117,7 @@ def get_bracket_id():
     return jsonify({"next_bracket_number": next_bracket_number})
 
 
-<<<<<<< HEAD
-@bracket_bp.route("/get_user_bracket_numbers", methods=["GET"])
-=======
 @bracket_bp.route('/get_user_bracket_numbers', methods=['GET'])
->>>>>>> main
 def get_user_bracket_numbers():
     user, mes, errNum = verify_user()
     if user is None:
@@ -160,13 +136,8 @@ def get_user_bracket_numbers():
     return (
         jsonify(
             {
-<<<<<<< HEAD
-                "message": "Bracket numbers retrieved successfully",
-                "bracket_numbers": bracket_numbers,
-=======
                 'message': 'Bracket numbers retrieved successfully',
                 'bracket_numbers': bracket_numbers,
->>>>>>> main
             }
         ),
         200,
@@ -184,23 +155,14 @@ def get_user_bracket(bracket_number):
     # Fetch the user's bracket by user_id and bracket_number
     bracket = Bracket.query.filter_by(id=user.id, bracket_number=bracket_number).first()
     if not bracket:
-<<<<<<< HEAD
-        return jsonify({"error": "Bracket not found"}), 404
-=======
         return jsonify({'error': 'Bracket not found'}), 404
->>>>>>> main
 
     # Return the bracket selection data
     return (
         jsonify(
             {
-<<<<<<< HEAD
-                "message": "Bracket retrieved successfully",
-                "bracket": bracket.bracket_selection,
-=======
                 'message': 'Bracket retrieved successfully',
                 'bracket': bracket.bracket_selection,
->>>>>>> main
             }
         ),
         200,
@@ -220,11 +182,7 @@ def create_user_bracket():
     bracket_selection = data.get("bracket_selection")
     if not bracket_number or not bracket_selection:
         return (
-<<<<<<< HEAD
-            jsonify({"error": "Bracket number and bracket selection are required"}),
-=======
             jsonify({'error': 'Bracket number and bracket selection are required'}),
->>>>>>> main
             400,
         )
     # Check if the user already has a bracket for the given bracket_number
@@ -238,13 +196,8 @@ def create_user_bracket():
         return (
             jsonify(
                 {
-<<<<<<< HEAD
-                    "message": "Bracket updated successfully",
-                    "bracket": bracket_selection,
-=======
                     'message': 'Bracket updated successfully',
                     'bracket': bracket_selection,
->>>>>>> main
                 }
             ),
             200,
@@ -258,16 +211,11 @@ def create_user_bracket():
     db.session.commit()
     return (
         jsonify(
-<<<<<<< HEAD
-            {"message": "Bracket created successfully", "bracket": bracket_selection}
-=======
             {'message': 'Bracket created successfully', 'bracket': bracket_selection}
->>>>>>> main
         ),
         201,
     )
 
-<<<<<<< HEAD
 
 # Delete user bracket
 @bracket_bp.route("/delete_user_bracket", methods=["POST"])
@@ -295,8 +243,6 @@ def delete_user_bracket():
     else:
         return jsonify({"error": "Bracket not found"}), 404
 
-=======
->>>>>>> main
 
 # User Verification
 def verify_user():
@@ -316,10 +262,6 @@ def verify_user():
     # Retrieve the user from the database using the provided user_id
     user = User.query.get(user_id)
     if not user:
-<<<<<<< HEAD
-        return None, jsonify({"error": "User not found"}), 404
-=======
         return None, jsonify({'error': 'User not found'}), 404
->>>>>>> main
 
     return user, None, None

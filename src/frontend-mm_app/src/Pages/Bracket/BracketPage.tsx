@@ -352,112 +352,17 @@ export default function BracketPage({
 
       if (!scoreResponse.ok) throw new Error("Scoring failed");
       const scoreData = await scoreResponse.json();
-<<<<<<< HEAD
-      setScore(scoreData.score); // update the score state with returned score
-      setBrackets((prev) => [...prev, newBracket[0]]);
-      setNewBracket([]);
-=======
       console.log("Score data: ", scoreData);
       setScoresMap(prev => ({
         ...prev,
         [bracket_number]: scoreData.score,
       }));
->>>>>>> main
     } catch (error) {
       console.error("Error saving bracket:", error);
       setError("Failed to save bracket.");
     }
   };
 
-<<<<<<< HEAD
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Brackets</h1>
-      {loading && <p>Loading brackets...</p>}
-      {error && <p className="text-red-500">Error: {error}</p>}
-      {(!loading && !error && brackets.length > 0) || newBracket.length > 0 ? (
-        <>
-          <ul>
-            {brackets.map((bracket, index) => {
-              const selectedTeams = selectedTeamsMap[bracket.id] || {};
-
-              return (
-                <li key={index} className="mb-2 border p-2 rounded">
-                  <div className="relative">
-                    <Bracket
-                      ref={bracketRef}
-                      bracket={bracket}
-                      liveBracket={false}
-                      initialSelection={selectedTeams}
-                      onChange={(newMap) =>
-                        setSelectedTeamsMap((prev) => ({
-                          ...prev,
-                          [bracket.id]: newMap,
-                        }))
-                      }
-                    />
-                    <div className="absolute bottom-2 right-2 flex gap-2">
-                      <Button
-                        onClick={() => deleteBracket(bracket)}
-                        className="bg-red-600 font-bold hover:bg-red-900"
-                      >
-                        DELETE
-                      </Button>
-                      <Button
-                        onClick={() => saveBracket(bracket.id)}
-                        className="bg-[var(--primary-color)] font-bold hover:bg-blue-900"
-                      >
-                        SAVE
-                      </Button>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-          <ul>
-            {newBracket.map((bracket, i) => {
-              const selectedTeams = selectedTeamsMap[bracket.id] || {};
-
-              return (
-                <li key={i} className="mb-2 border p-2 rounded">
-                  <div className="relative">
-                    <Bracket
-                      ref={bracketRef}
-                      bracket={bracket}
-                      liveBracket={false}
-                      initialSelection={selectedTeams}
-                      onChange={(newMap) =>
-                        setSelectedTeamsMap((prev) => ({
-                          ...prev,
-                          [bracket.id]: newMap,
-                        }))
-                      }
-                    />
-                    <div className="absolute bottom-2 right-2 flex gap-2">
-                      <Button
-                        onClick={() => deleteBracket(bracket, false)}
-                        className="bg-red-600 font-bold hover:bg-red-900"
-                      >
-                        DELETE
-                      </Button>
-                      <Button
-                        onClick={() => saveBracket(bracket.id)}
-                        className="bg-[var(--primary-color)] font-bold hover:bg-blue-900"
-                      >
-                        SAVE
-                      </Button>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </>
-      ) : (
-        !loading && !error && <p>No brackets found.</p>
-      )}
-=======
 return (
   <div className="p-4">
     <h1 className="text-2xl font-bold mb-4">Brackets</h1>
@@ -497,9 +402,16 @@ return (
                     >
                       SAVE BRACKET
                     </Button>
+                    
                   ) : (
                     <span className="font-bold">Score: {scoresMap[bracket.id]}</span>
                   )}
+                  <Button
+                        onClick={() => deleteBracket(bracket)}
+                        className="bg-red-600 font-bold hover:bg-red-900"
+                      >
+                        DELETE
+                      </Button>
                 </div>
               </div>
             </li>
@@ -510,25 +422,9 @@ return (
       !loading &&
       !error && <p>No brackets found.</p>
     )}
->>>>>>> main
 
     {/* remove the old single-score display; scores are shown per-bracket now */}
 
-<<<<<<< HEAD
-      {token ? (
-        <Button
-          onClick={() => createBracket()}
-          className="bg-[var(--primary-color)] font-bold hover:bg-blue-900 mt-4"
-          disabled={newBracket.length > 0 ? true : false}
-        >
-          CREATE NEW BRACKET
-        </Button>
-      ) : (
-        <></>
-      )}
-    </div>
-  );
-=======
     {token && (
       <Button
         onClick={() => createBracket()}
@@ -539,5 +435,4 @@ return (
     )}
   </div>
 );
->>>>>>> main
 }
