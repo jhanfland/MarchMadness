@@ -1,0 +1,53 @@
+# version: '3.8'
+
+services:
+  db:
+    build:
+      context: ./src/MySQL_Database
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: team3
+      MYSQL_DATABASE: march_madness_betting
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql  # Reference to named volume
+    container_name: MySQLDatabase
+
+  backend:
+    build:
+      context: ./src/backend
+    restart: always
+    env_file:
+      - .env
+    environment:
+      FLASK_ENV: development
+      SECRET_KEY: "your_secret_key"
+      SQLALCHEMY_DATABASE_URI: "mysql://root:team3@db:3306/march_madness_betting"
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    container_name: FlaskBackend
+
+  frontend:
+    build:
+      context: ./src/frontend-mm_app
+      dockerfile: Dockerfile.prod
+    restart: always
+    environment:
+      VITE_BACKEND_URL: http://backend:8000
+      CHOKIDAR_USEPOLLING: "true" # Force polling for file changes
+    depends_on:
+      - backend
+    ports:
+      - "3000:5173" # Ensure the correct Vite port is mapped
+    volumes:
+      - /app/node_modules # Prevent overwriting node_modules
+    container_name: frontendReact
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+# Ensure this section exists to define the named volume
+volumes:
+  mysql_data:

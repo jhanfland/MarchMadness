@@ -1,12 +1,19 @@
-import { Bracket as BracketType, Team, Seed, Round } from "@/Pages/Bracket/components/bracketTypes";
+import {
+  Bracket as BracketType,
+  Team,
+  Seed,
+  Round,
+} from "@/Pages/Bracket/components/bracketTypes";
 import { useState, useEffect } from "react";
 import Bracket from "@/Pages/Bracket/components/bracket";
 
 export default function LiveBracketPage() {
-    // use state var to set live bracket
-    const [liveBracket, setLiveBracket] = useState<BracketType []>([])
-    // does not show info while waiting/loading info from the api
-    const [loading, setLoading] = useState(true);
+  // use state var to set live bracket
+  const [liveBracket, setLiveBracket] = useState<BracketType>({} as BracketType);
+  // does not show info while waiting/loading info from the api
+  const [error, setError] = useState<String>("");
+
+  const [loading, setLoading] = useState(true);
 
     // formats the data to make it consistent with our bracket structure
     function formatDataIntoBracketStructure(data : any): any {
@@ -30,16 +37,16 @@ export default function LiveBracketPage() {
                         return gameNumberA - gameNumberB;
                     });
                     region.games.forEach((game : any, idx3: any) => {
-                    console.log("games", game);
-                    // grabs team info
-                    const awayTeam : Team = {name: game.away.alias, seed: game.away.seed};
-                    const homeTeam : Team = {name: game.home.alias, seed: game.home.seed };
-                    // puts team info into an array
-                    const teamArray : Team[] = [homeTeam, awayTeam];
-                    // creates info abouth the game
-                    const teamInfo : Seed = {id: game.id, teams: teamArray, homeScore: game.home_points, awayScore: game.away_points, date: new Date(game.scheduled).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }), region: region.bracket.name.match(/^(\w+)/)?.[1].toUpperCase() || ""}
-                    // pushes all seed info into an array from a selected round
-                    seedArray.push(teamInfo)
+                      console.log(game);
+                      // grabs team info
+                      const awayTeam : Team = {name: game.away.alias, seed: game.away.seed};
+                      const homeTeam : Team = {name: game.home.alias, seed: game.home.seed };
+                      // puts team info into an array
+                      const teamArray : Team[] = [homeTeam, awayTeam];
+                      // creates info abouth the game
+                      const teamInfo : Seed = {id: game.id, location:`${game.venue.name} (${game.venue.city}, ${game.venue.state})`, teams: teamArray, homeScore: game.home_points, awayScore: game.away_points, date: new Date(game.scheduled).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }), region: region.bracket.name.match(/^(\w+)/)?.[1].toUpperCase() || ""}
+                      // pushes all seed info into an array from a selected round
+                      seedArray.push(teamInfo)
                     })
                 })
             // is in game information after the final 4
@@ -51,7 +58,7 @@ export default function LiveBracketPage() {
                     // puts team info into an array
                     const teamArray : Team[] = [homeTeam, awayTeam];
                     // creates info abouth the game
-                    const teamInfo : Seed = {id: game.id, teams: teamArray, region: 'FINAL FOUR', homeScore: game.home_points, awayScore: game.away_points, date: new Date(game.scheduled).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                    const teamInfo : Seed = {id: game.id, location:`${game.venue.name} (${game.venue.city}, ${game.venue.state})`, teams: teamArray, region: 'FINAL FOUR', homeScore: game.home_points, awayScore: game.away_points, date: new Date(game.scheduled).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                     // pushes all seed info into an array from a selected round
                     seedArray.push(teamInfo)
                 })
@@ -61,39 +68,63 @@ export default function LiveBracketPage() {
             roundObjArray.push(roundObj);
         }
         })
-        console.log("roundObjArrray", roundObjArray);
         // will need to change id based on which bracket they have created
         const bracketObj: BracketType = {title: data.name , id: 1, rounds: roundObjArray }
         // updated brackets object
-        setLiveBracket([bracketObj]);
+        setLiveBracket(bracketObj);
+        setLoading(false);
     };
 
-
-    useEffect(() => {
-        function grab_live_bracket_info() {
-          fetch("http://localhost:8000/get_bracket", {
-            method: "GET",
-          })
-            .then((response) => {
-                if (!response.ok) {
-                throw new Error("Failed to fetch brackets");
-                }
-                return response.json();
-            })
-            .then((data) => {
-                formatDataIntoBracketStructure(data);
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.error("Error fetching brackets:", err);
-            });
-        }
+  useEffect(() => {
+    function grab_live_bracket_info() {
+      fetch("http://localhost:8000/get_bracket", {
+        method: "GET",
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch brackets");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (data.message === "Limit Exceeded") {
+            setError("Live bracket could not be loaded");
+            throw new Error(data.message);
+          } else {
+            formatDataIntoBracketStructure(data);
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching brackets:", err);
+        });
+    }
     grab_live_bracket_info();
-    }, []);
+  }, []);
 
-    return (
-        <div>
-            {loading ? <p>Loading brackets...</p> : <Bracket bracket={liveBracket} liveBracket={true} />}
+  return (
+    <>
+      {loading ? (
+        error ? (
+          <div className="border rounded-lg p-6 text-center">
+            <p className="font-medium">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mb-4"></div>
+            <p className="pl-2">Loading live bracket...</p>
+          </div>
+        )
+      ) : (
+        <div className="border border-white px-8">
+          <Bracket bracket={liveBracket} liveBracket={true} />
         </div>
-    );
+      )}
+    </>
+  );
 }

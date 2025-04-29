@@ -1,7 +1,7 @@
 import ButtonBar from "@/components/ui/buttonbar";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import logo from "./../images/logo.png";
+import logo_import from "../images/ncaa_logos/AUB.png";
 
 export function LiveScoresPage() {
     const [marchMadnessData, mmData] = useState(null);
@@ -36,18 +36,32 @@ export function LiveScoresPage() {
             name_home.innerHTML = game.home.alias;
             score_away.innerHTML = game.away_points;
             score_home.innerHTML = game.home_points;
-            name_away.className = "mr-auto";
-            name_home.className = "mr-auto";
+            name_away.className = "mr-auto pl-2";
+            name_home.className = "mr-auto pl-2";
 
-            const away_square = document.createElement("div");
-            away_square.className = "valid-square";
-            away.appendChild(away_square);
+            // Inserts team logos into score boxes
+            const images = import.meta.glob('../images/ncaa_logos/*.svg', { eager: true });
+            for (const path in images) {
+                var team_alias = path.split('/')[3].replace('.svg','');
+                if(game.away.alias == team_alias){
+                    const img = document.createElement('img');
+                    img.src = images[path].default;
+                    img.width = 25;
+                    away.appendChild(img);
+                }
+
+                if(game.home.alias == team_alias){
+                    const img = document.createElement('img');
+                    img.src = images[path].default;
+                    img.width = 25;
+                    home.appendChild(img);
+                }
+                
+              }
+
             away.appendChild(name_away);
             away.appendChild(score_away);
 
-            const home_square = document.createElement("div");
-            home_square.className = "valid-square";
-            home.appendChild(home_square);
             home.appendChild(name_home);
             home.appendChild(score_home);
 
