@@ -15,6 +15,7 @@ export default function Navbar() {
   // Sign out handler removes token and navigates to home
   const handleSignOut = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("passwordLength");
     setToken(null);
     navigate("/");
   };
@@ -27,7 +28,7 @@ export default function Navbar() {
         <Link to="/liveBracket">Live Bracket</Link>
         <Link to="/bracket">My Brackets</Link>
         <Link to="/scores">Scores</Link>
-        <Link to="/news">News</Link>
+        <Link to="/account">My Account</Link>
         {token ? (
           <button
             onClick={handleSignOut}

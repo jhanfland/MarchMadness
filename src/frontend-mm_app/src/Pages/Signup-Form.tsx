@@ -41,6 +41,8 @@ export function SignupForm() {
 
       localStorage.setItem("token", data.token);
       navigate("/");
+      localStorage.setItem("passwordLength", password.length.toString());
+      navigate("/");
     } catch (error: any) {
       console.error("Signup failed:", error);
       setError(error.message);

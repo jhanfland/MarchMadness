@@ -233,7 +233,6 @@ export default function BracketPage({
 
       const data = await API.json();
       const bracket_num_data = await bracket_number.json();
-      console.log("Bracket number data:", bracket_num_data);
 
       setBrackets((prev) => [
         ...prev,
@@ -260,7 +259,6 @@ export default function BracketPage({
 
     const token = localStorage.getItem("token");
     const bracket = bracketRef.getParsedBracketData();
-    console.log("parsedBracketData", bracket);
     if (!bracket) {
       alert("Please finish all 63 picks before saving!");
       return;
@@ -279,7 +277,6 @@ export default function BracketPage({
         }),
       });
       const saveData = await saveResponse.json();
-      console.log("Saved bracket response:", saveData);
 
       const userBracketResponse = await fetch(
         `${BACKEND_URL}/get_user_bracket/${bracket_number}`,
@@ -302,8 +299,6 @@ export default function BracketPage({
         },
       });
       const liveBracketData = await liveBracketResponse.json();
-      console.log("User bracket: ", userBracketData.bracket);
-      console.log("Live Bracket: ", liveBracketData);
 
       const scoreResponse = await fetch(`${BACKEND_URL}/score_bracket`, {
         method: "POST",
