@@ -1,4 +1,6 @@
+# mypy: disable-error-code="name-defined"
 from app import db
+
 
 class Bracket(db.Model):
     __tablename__ = 'bracket'
