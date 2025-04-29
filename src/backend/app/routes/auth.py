@@ -142,11 +142,6 @@ def change_password():
     return jsonify({"message": "Password changed successfully"}), 200
 
 
-@auth_bp.route('/update-profile', methods=['POST'])
-def update_profile():
-    return jsonify({"message": "Profile updated"}), 200
-
-
 @auth_bp.route('/delete-account', methods=['DELETE'])
 def delete_account():
     return jsonify({"message": "Account deleted"}), 200
