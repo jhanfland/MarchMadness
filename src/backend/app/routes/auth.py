@@ -136,7 +136,6 @@ def verify_email():
 def resend_verification():
     return jsonify({"message": "Verification email resent"}), 200
 
-<<<<<<< HEAD
 
 @auth_bp.route('/change-password', methods=['POST'])
 def change_password():
@@ -148,8 +147,6 @@ def update_profile():
     return jsonify({"message": "Profile updated"}), 200
 
 
-=======
->>>>>>> main
 @auth_bp.route('/delete-account', methods=['DELETE'])
 def delete_account():
     return jsonify({"message": "Account deleted"}), 200
