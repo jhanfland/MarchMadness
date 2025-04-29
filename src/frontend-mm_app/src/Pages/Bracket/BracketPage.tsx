@@ -16,7 +16,7 @@ export default function BracketPage({
   const [brackets, setBrackets] = useState<BracketType[]>(initialBrackets);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [score, setScore] = useState<number | null>(null);
+  const [scoresMap, setScoresMap] = useState<Record<number, number>>({});
   const [selectedTeamsMap, setSelectedTeamsMap] = useState<
     Record<number, Record<string, string>>
   >({});
@@ -46,6 +46,7 @@ export default function BracketPage({
             return data.bracket;
           }),
         );
+        const rawBrackets = savedBrackets.map(b => JSON.parse(JSON.stringify(b)));
 
         const templateRes = await fetch(
           `${BACKEND_URL}/generate_bracket_template`,
@@ -116,6 +117,33 @@ export default function BracketPage({
 
         setBrackets(formatted);
         setSelectedTeamsMap(selectionMap);
+        const liveRes = await fetch(`${BACKEND_URL}/get_bracket`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const liveBracket = await liveRes.json();
+        
+        // ── score the untouched clone, not the mutated one ───────────────
+        const newScores: Record<number, number> = {};
+        await Promise.all(
+          rawBrackets.map(async (raw) => {
+            const resp = await fetch(`${BACKEND_URL}/score_bracket`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                user_bracket: raw,        // << use the clean copy
+                live_bracket: liveBracket,
+              }),
+            });
+            const { score } = await resp.json();
+            newScores[raw.id] = score;
+          })
+        );
+        setScoresMap(newScores);
+
+
       } catch (err) {
         console.error("Bracket load error:", err);
         setError("Could not load brackets.");
@@ -286,73 +314,80 @@ export default function BracketPage({
 
       if (!scoreResponse.ok) throw new Error("Scoring failed");
       const scoreData = await scoreResponse.json();
-      setScore(scoreData.score);
+      console.log("Score data: ", scoreData);
+      setScoresMap(prev => ({
+        ...prev,
+        [bracket_number]: scoreData.score,
+      }));
     } catch (error) {
       console.error("Error saving bracket:", error);
       setError("Failed to save bracket.");
     }
   };
 
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Brackets</h1>
-      {loading && <p>Loading brackets...</p>}
-      {error && <p className="text-red-500">Error: {error}</p>}
-      {!loading && !error && brackets.length > 0 ? (
-        <ul>
-          {brackets.map((bracket, index) => {
-            const selectedTeams = selectedTeamsMap[bracket.id] || {};
+return (
+  <div className="p-4">
+    <h1 className="text-2xl font-bold mb-4">Brackets</h1>
 
-            return (
-              <li key={index} className="mb-2 border p-2 rounded">
-                <div className="relative">
-                  <Bracket
-                    ref={(el) => {
-                      if (el) {
-                        bracketRefs.current[bracket.id] = el;
-                      }
-                    }}
-                    bracket={bracket}
-                    liveBracket={false}
-                    initialSelection={selectedTeams}
-                    onChange={(newMap) => {
-                      setSelectedTeamsMap((prev) => ({
-                        ...prev,
-                        [bracket.id]: newMap,
-                      }));
-                    }}
-                  />
-                  <div className="absolute bottom-2 right-2">
+    {loading && <p>Loading brackets...</p>}
+    {error && <p className="text-red-500">Error: {error}</p>}
+
+    {!loading && !error && brackets.length > 0 ? (
+      <ul>
+        {brackets.map((bracket, index) => {
+          const selectedTeams = selectedTeamsMap[bracket.id] || {};
+
+          return (
+            <li key={index} className="mb-2 border p-2 rounded">
+              <div className="relative">
+                <Bracket
+                  ref={(el) => {
+                    if (el) bracketRefs.current[bracket.id] = el;
+                  }}
+                  bracket={bracket}
+                  liveBracket={false}
+                  initialSelection={selectedTeams}
+                  onChange={(newMap) =>
+                    setSelectedTeamsMap((prev) => ({
+                      ...prev,
+                      [bracket.id]: newMap,
+                    }))
+                  }
+                />
+
+                {/* SAVE button only if not yet scored; otherwise show score */}
+                <div className="absolute bottom-2 right-2 flex items-center space-x-4">
+                  {scoresMap[bracket.id] == null ? (
                     <Button
                       onClick={() => saveBracket(bracket.id)}
                       className="bg-[var(--primary-color)] font-bold hover:bg-blue-900"
                     >
                       SAVE BRACKET
                     </Button>
-                  </div>
+                  ) : (
+                    <span className="font-bold">Score: {scoresMap[bracket.id]}</span>
+                  )}
                 </div>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        !loading && !error && <p>No brackets found.</p>
-      )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    ) : (
+      !loading &&
+      !error && <p>No brackets found.</p>
+    )}
 
-      {score !== null && (
-        <p className="text-xl font-bold mt-4">Score: {score}</p>
-      )}
+    {/* remove the old single-score display; scores are shown per-bracket now */}
 
-      {token ? (
-        <Button
-          onClick={() => createBracket()}
-          className="bg-[var(--primary-color)] font-bold hover:bg-blue-900 mt-4"
-        >
-          CREATE NEW BRACKET
-        </Button>
-      ) : (
-        <></>
-      )}
-    </div>
-  );
+    {token && (
+      <Button
+        onClick={() => createBracket()}
+        className="bg-[var(--primary-color)] font-bold hover:bg-blue-900 mt-4"
+      >
+        CREATE NEW BRACKET
+      </Button>
+    )}
+  </div>
+);
 }
