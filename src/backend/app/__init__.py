@@ -1,11 +1,14 @@
+import os
+from pathlib import Path
+
 # mypy: disable-error-code="import-not-found, import-untyped"
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from config import Config
 from dotenv import load_dotenv
-from pathlib import Path
-import os
+from flask import Flask
+from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 
 # Get environment variables globally
 api_key = os.getenv('BRACKET_API_KEY')
@@ -28,9 +31,10 @@ def create_app():
 
     # Register Blueprints (Controllers)
     from app.routes.auth import auth_bp
-    from app.routes.main import main_bp
     from app.routes.bracket import bracket_bp
+    from app.routes.main import main_bp
     from app.routes.chatbot import chatbot_bp
+    
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(bracket_bp)

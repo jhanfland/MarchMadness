@@ -14,6 +14,7 @@ export default function BracketPage({
   initialBrackets?: BracketType[];
 }) {
   const [brackets, setBrackets] = useState<BracketType[]>(initialBrackets);
+  const [newBracket, setNewBracket] = useState<BracketType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [scoresMap, setScoresMap] = useState<Record<number, number>>({});
@@ -249,6 +250,43 @@ export default function BracketPage({
     }
   };
 
+  const deleteBracket = async (bracket: BracketType, isOnBackend = true) => {
+    const token = localStorage.getItem("token");
+
+    //Call backend
+
+    if (isOnBackend) {
+      fetch(`${BACKEND_URL}/delete_user_bracket`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          bracket_number: bracket.id,
+        }),
+      })
+        .then((r) => {
+          if (r.status == 200) {
+            return r.json();
+          } else if (r.status == 404) {
+            throw new Error("Bracket not found on backend");
+          } else {
+            throw new Error("Error with deletion");
+          }
+        })
+        .then((data) => {
+          console.log("Deleted bracket #", bracket.id, "on the backend");
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    }
+
+    setBrackets((prev) => prev.filter((b) => b.id != bracket.id));
+    setNewBracket((prev) => prev.filter((b) => b.id != bracket.id));
+  };
+
   const saveBracket = async (bracket_number: number) => {
     const bracketRef = bracketRefs.current[bracket_number];
     if (!bracketRef) {
@@ -364,9 +402,16 @@ return (
                     >
                       SAVE BRACKET
                     </Button>
+                    
                   ) : (
                     <span className="font-bold">Score: {scoresMap[bracket.id]}</span>
                   )}
+                  <Button
+                        onClick={() => deleteBracket(bracket)}
+                        className="bg-red-600 font-bold hover:bg-red-900"
+                      >
+                        DELETE
+                      </Button>
                 </div>
               </div>
             </li>

@@ -1,16 +1,17 @@
-# mypy: disable-error-code="import-not-found, import-untyped"
+import datetime
+
+import requests
 from flask import Blueprint, request, jsonify, session
 from app import db, api_key, mm_tournament_id, prev_mm_tournament_id
 from app.models.bracket import Bracket
 from app.models.user import User
-import datetime
-import requests
-from flask import current_app as app
-from sqlalchemy import func
 from app.scoring import score_bracket
+from flask import Blueprint
+from flask import current_app as app
+from flask import jsonify, request, session
+from sqlalchemy import func
 
-
-bracket_bp = Blueprint('bracket', __name__)
+bracket_bp = Blueprint("bracket", __name__)
 
 
 @bracket_bp.route('/score_bracket', methods=['POST'])
@@ -21,8 +22,8 @@ def score_user_bracket():
         return mes, errNum
 
     data = request.get_json()
-    user_bracket = data.get('user_bracket')
-    live_bracket = data.get('live_bracket')
+    user_bracket = data.get("user_bracket")
+    live_bracket = data.get("live_bracket")
     if not user_bracket or not live_bracket:
         return (
             jsonify({'error': 'Both user_bracket and live_bracket are required'}),
@@ -30,11 +31,12 @@ def score_user_bracket():
         )
     # Calculate the score by comparing the user bracket with the live bracket.
     score = score_bracket(user_bracket, live_bracket)
-    return jsonify({'score': score}), 200
+    return jsonify({"score": score}), 200
+
 
 
 # Returns live bracket from API
-@bracket_bp.route('/get_bracket', methods=['GET'])
+@bracket_bp.route("/get_bracket", methods=["GET"])
 def get_realtime_bracket():
     # switch out mm_tournament_id, with prev_mm_tournament_id dependent on what you need
     # to understand/use
@@ -44,21 +46,21 @@ def get_realtime_bracket():
     return jsonify(response.json())
 
 
-@bracket_bp.route('/generate_bracket_template', methods=['GET'])
+@bracket_bp.route("/generate_bracket_template", methods=["GET"])
 def generate_bracket_template():
     # copied from above
     url = f"https://api.sportradar.com/ncaamb/trial/v8/en/tournaments/{mm_tournament_id}/schedule.json?api_key={api_key}"  # noqa: E501
     headers = {"accept": "application/json"}  # <-- include this
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
-        return jsonify({'error': 'Failed to get data from API'}), 500
+        return jsonify({"error": "Failed to get data from API"}), 500
 
     data = response.json()
 
     # loops and filters API to find first round
-    first_round = next((r for r in data['rounds'] if r['name'] == 'First Round'), None)
+    first_round = next((r for r in data["rounds"] if r["name"] == "First Round"), None)
     if not first_round:
-        return jsonify({'error': 'First Round not found'}), 404
+        return jsonify({"error": "First Round not found"}), 404
 
     # values from API
     region_map = {0: "SOUTH", 1: "MIDWEST", 2: "EAST", 3: "WEST"}
@@ -112,7 +114,7 @@ def get_bracket_id():
     )
     # If user has no brackets, start from 1
     next_bracket_number = (max_bracket or 0) + 1
-    return jsonify({'next_bracket_number': next_bracket_number})
+    return jsonify({"next_bracket_number": next_bracket_number})
 
 
 @bracket_bp.route('/get_user_bracket_numbers', methods=['GET'])
@@ -143,7 +145,7 @@ def get_user_bracket_numbers():
 
 
 # Returns users bracket that has already been created
-@bracket_bp.route('/get_user_bracket/<int:bracket_number>', methods=['GET'])
+@bracket_bp.route("/get_user_bracket/<int:bracket_number>", methods=["GET"])
 def get_user_bracket(bracket_number):
     # User Verification
     user, mes, errNum = verify_user()
@@ -168,7 +170,7 @@ def get_user_bracket(bracket_number):
 
 
 # Created User Bracket
-@bracket_bp.route('/create_user_bracket', methods=['POST'])
+@bracket_bp.route("/create_user_bracket", methods=["POST"])
 def create_user_bracket():
     # User Verification
     user, mes, errNum = verify_user()
@@ -176,8 +178,8 @@ def create_user_bracket():
         return mes, errNum
     # Get bracket number  and bracket selection
     data = request.get_json()
-    bracket_number = data.get('bracket_number')
-    bracket_selection = data.get('bracket_selection')
+    bracket_number = data.get("bracket_number")
+    bracket_selection = data.get("bracket_selection")
     if not bracket_number or not bracket_selection:
         return (
             jsonify({'error': 'Bracket number and bracket selection are required'}),
@@ -215,17 +217,44 @@ def create_user_bracket():
     )
 
 
+# Delete user bracket
+@bracket_bp.route("/delete_user_bracket", methods=["POST"])
+def delete_user_bracket():
+    # User Verification
+    user, mes, errNum = verify_user()
+    if user is None:
+        return mes, errNum
+
+    # Get bracket number from request
+    data = request.get_json()
+    bracket_number = data.get("bracket_number")
+    if not bracket_number:
+        return jsonify({"error": "Bracket number is required"}), 400
+
+    # Find existing bracket
+    existing_bracket = Bracket.query.filter_by(
+        id=user.id, bracket_number=bracket_number
+    ).first()
+
+    if existing_bracket:
+        db.session.delete(existing_bracket)
+        db.session.commit()
+        return jsonify({"message": "Bracket deleted successfully"}), 200
+    else:
+        return jsonify({"error": "Bracket not found"}), 404
+
+
 # User Verification
 def verify_user():
     # Extract the token from the Authorization header
-    auth_header = request.headers.get('Authorization')
+    auth_header = request.headers.get("Authorization")
     if not auth_header:
-        return None, jsonify({'error': 'Authorization header missing'}), 401
+        return None, jsonify({"error": "Authorization header missing"}), 401
 
     # The token should be in the form 'Bearer <token>'
     token = auth_header.split(" ")[1] if len(auth_header.split()) > 1 else None
     if not token:
-        return None, jsonify({'error': 'Token missing'}), 401
+        return None, jsonify({"error": "Token missing"}), 401
 
     # Use the token as the user ID (or replace with your preferred method)
     user_id = token

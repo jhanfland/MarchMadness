@@ -223,7 +223,7 @@ const CustomSeed = ({
 
 const Bracket = forwardRef(function Bracket(
   { bracket, liveBracket, onChange, initialSelection }: BracketProps,
-  ref
+  ref,
 ) {
   const [selectedRegion, setSelectedRegion] = useState<Region>("EAST");
 
@@ -565,7 +565,7 @@ const Bracket = forwardRef(function Bracket(
               >
                 {region}
               </button>
-            )
+            ),
           )}
         </div>
       )}
@@ -574,4 +574,3 @@ const Bracket = forwardRef(function Bracket(
 });
 
 export default Bracket;
-
